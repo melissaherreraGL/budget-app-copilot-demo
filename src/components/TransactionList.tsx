@@ -20,10 +20,12 @@ export default function TransactionList({
   }
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-2" data-testid="transactions-list">
       {transactions.map((tx) => (
         <div
           key={tx.id}
+          data-testid="transaction-row"
+          data-transaction-id={tx.id}
           className="rounded-lg border border-slate-200 bg-white px-4 py-3 flex items-center justify-between hover:bg-slate-50 transition"
         >
           <div className="flex-1 min-w-0">
@@ -31,7 +33,9 @@ export default function TransactionList({
               <div className="text-xs font-medium text-slate-500 uppercase tracking-wide">
                 {tx.category}
               </div>
-              <p className="text-sm text-slate-600">{tx.note || "Sin nota"}</p>
+              <p className="text-sm text-slate-600">
+                {tx.note || "Sin nota"}
+              </p>
             </div>
             <p className="text-xs text-slate-400 mt-1">{tx.date}</p>
           </div>
@@ -46,9 +50,11 @@ export default function TransactionList({
             </span>
 
             <button
+              type="button"
+              data-testid="delete-transaction"
+              aria-label={`Eliminar transacción: ${tx.note || tx.category}`}
               onClick={() => onDelete(tx.id)}
               className="text-xs text-slate-400 hover:text-slate-600 transition"
-              title="Eliminar"
             >
               ✕
             </button>

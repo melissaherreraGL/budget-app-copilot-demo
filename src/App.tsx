@@ -9,6 +9,16 @@ import { useLocalStorage } from "./hooks/useLocalStorage";
 import type { Transaction } from "./types/transaction";
 import { toMonthKey } from "./utils/date";
 
+// ✅ NEW: helper para calcular el mes anterior a partir de "YYYY-MM"
+function prevMonthKey(monthKey: string) {
+  const [yStr, mStr] = monthKey.split("-");
+  const y = Number(yStr);
+  const m = Number(mStr); // 1..12
+
+  if (m === 1) return `${y - 1}-12`;
+  return `${y}-${String(m - 1).padStart(2, "0")}`;
+}
+
 export default function App() {
   const [month, setMonth] = useState<string>(() => toMonthKey(new Date()));
   const [transactions, setTransactions] = useLocalStorage<Transaction[]>(
@@ -16,12 +26,14 @@ export default function App() {
     []
   );
 
+  // Mes actual: transacciones filtradas
   const monthTransactions = useMemo(() => {
     return transactions
       .filter((t) => t.date.slice(0, 7) === month)
       .sort((a, b) => (a.date < b.date ? 1 : -1));
   }, [transactions, month]);
 
+  // Mes actual: totales
   const totals = useMemo(() => {
     let income = 0;
     let expense = 0;
@@ -37,6 +49,30 @@ export default function App() {
       balance: income - expense,
     };
   }, [monthTransactions]);
+
+  // ✅ NEW: mes anterior (YYYY-MM)
+  const prevMonth = useMemo(() => prevMonthKey(month), [month]);
+
+  // ✅ NEW: transacciones del mes anterior (no hace falta sort para totales)
+  const prevMonthTransactions = useMemo(() => {
+    return transactions.filter((t) => t.date.slice(0, 7) === prevMonth);
+  }, [transactions, prevMonth]);
+
+  // ✅ NEW: totales del mes anterior
+  const prevTotals = useMemo(() => {
+    let income = 0;
+    let expense = 0;
+
+    for (const t of prevMonthTransactions) {
+      if (t.type === "income") income += t.amount;
+      if (t.type === "expense") expense += t.amount;
+    }
+
+    return {
+      income,
+      expense,
+    };
+  }, [prevMonthTransactions]);
 
   const title = useMemo(() => {
     const [y, m] = month.split("-");
@@ -120,44 +156,44 @@ export default function App() {
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900">
       <header className="border-b border-slate-200 bg-white/80 backdrop-blur">
-  <div className="max-w-5xl mx-auto px-4 py-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-    <div>
-      <h1 className="text-xl font-medium tracking-tight">Budget</h1>
-      <p className="text-slate-500 text-sm mt-1">
-        {title} · Resumen y categorías
-      </p>
-    </div>
+        <div className="max-w-5xl mx-auto px-4 py-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h1 className="text-xl font-medium tracking-tight">Budget</h1>
+            <p className="text-slate-500 text-sm mt-1">
+              {title} · Resumen y categorías
+            </p>
+          </div>
 
-    <div className="flex items-center gap-2">
-      <MonthPicker value={month} onChange={setMonth} />
+          <div className="flex items-center gap-2">
+            <MonthPicker value={month} onChange={setMonth} />
 
-      <button
-        type="button"
-        onClick={seedDemoData}
-        className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs text-slate-600 hover:bg-slate-100 transition"
-      >
-        Demo
-      </button>
+            <button
+              type="button"
+              onClick={seedDemoData}
+              className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs text-slate-600 hover:bg-slate-100 transition"
+            >
+              Demo
+            </button>
 
-      <button
-        type="button"
-        onClick={() => {
-          if (confirm("¿Eliminar todos los datos?")) clearAllData();
-        }}
-        className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs text-slate-600 hover:bg-slate-100 transition"
-      >
-        Limpiar
-      </button>
-    </div>
-  </div>
-</header>
-
+            <button
+              type="button"
+              onClick={clearAllData}
+              className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs text-slate-600 hover:bg-slate-100 transition"
+            >
+              Limpiar
+            </button>
+          </div>
+        </div>
+      </header>
 
       <main className="max-w-5xl mx-auto px-6 py-12 space-y-10">
         <SummaryCards
           income={totals.income}
           expense={totals.expense}
           balance={totals.balance}
+          // ✅ NEW: para calcular “% vs mes anterior” en SummaryCards
+          prevIncome={prevTotals.income}
+          prevExpense={prevTotals.expense}
         />
 
         <TransactionForm onAdd={addTransaction} defaultDate={defaultDate} />

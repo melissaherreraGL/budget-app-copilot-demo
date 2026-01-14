@@ -1,5 +1,6 @@
 import { useState } from "react";
 import type { Transaction } from "../types/transaction";
+import type React from "react";
 
 const CATEGORIES = {
   income: ["salary", "bonus", "other"],
@@ -42,17 +43,23 @@ export default function TransactionForm({
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        {/* Tipo */}
         <div>
-          <label className="block text-xs font-medium text-slate-600 mb-2">
+          <label
+            htmlFor="transaction-type"
+            className="block text-xs font-medium text-slate-600 mb-2"
+          >
             Tipo
           </label>
+
           <select
+            id="transaction-type"
+            name="transactionType"
+            data-testid="transaction-type"
             value={type}
             onChange={(e) => {
               setType(e.target.value as "income" | "expense");
-              setCategory(
-                e.target.value === "income" ? "salary" : "food"
-              );
+              setCategory(e.target.value === "income" ? "salary" : "food");
             }}
             className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-400"
           >
@@ -61,11 +68,19 @@ export default function TransactionForm({
           </select>
         </div>
 
+        {/* Monto */}
         <div>
-          <label className="block text-xs font-medium text-slate-600 mb-2">
+          <label
+            htmlFor="amount"
+            className="block text-xs font-medium text-slate-600 mb-2"
+          >
             Monto
           </label>
+
           <input
+            id="amount"
+            name="amount"
+            data-testid="amount"
             type="number"
             step="0.01"
             min="0"
@@ -76,11 +91,19 @@ export default function TransactionForm({
           />
         </div>
 
+        {/* Categoría */}
         <div>
-          <label className="block text-xs font-medium text-slate-600 mb-2">
+          <label
+            htmlFor="category"
+            className="block text-xs font-medium text-slate-600 mb-2"
+          >
             Categoría
           </label>
+
           <select
+            id="category"
+            name="category"
+            data-testid="category"
             value={category}
             onChange={(e) => setCategory(e.target.value)}
             className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-400"
@@ -93,11 +116,19 @@ export default function TransactionForm({
           </select>
         </div>
 
+        {/* Fecha */}
         <div>
-          <label className="block text-xs font-medium text-slate-600 mb-2">
+          <label
+            htmlFor="date"
+            className="block text-xs font-medium text-slate-600 mb-2"
+          >
             Fecha
           </label>
+
           <input
+            id="date"
+            name="date"
+            data-testid="date"
             type="date"
             value={date}
             onChange={(e) => setDate(e.target.value)}
@@ -106,11 +137,19 @@ export default function TransactionForm({
         </div>
       </div>
 
+      {/* Nota */}
       <div>
-        <label className="block text-xs font-medium text-slate-600 mb-2">
+        <label
+          htmlFor="note"
+          className="block text-xs font-medium text-slate-600 mb-2"
+        >
           Nota (opcional)
         </label>
+
         <input
+          id="note"
+          name="note"
+          data-testid="note"
           type="text"
           value={note}
           onChange={(e) => setNote(e.target.value)}
