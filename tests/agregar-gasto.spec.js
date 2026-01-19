@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test';
 test('agrega un gasto y aparece en la lista del mes seleccionado', async ({ page }) => {
   await page.goto('http://localhost:5173');
 
-  // Estado limpio y determinístico
+  // Estado limpio antes de comenzar
   await page.evaluate(() => localStorage.clear());
   await page.reload();
 
