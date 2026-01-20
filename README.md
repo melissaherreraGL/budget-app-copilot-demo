@@ -29,16 +29,30 @@ Aplicación web moderna y funcional para el manejo integral de tu presupuesto pe
   - Total de ingresos
   - Total de gastos
   - Balance neto (saldo disponible)
+  - Gasto por categoría
   
 ### 🎮 Navegación Intuitiva
 - **📅 Selector de mes** – Navega entre meses de forma fluida
 - **📋 Listado de movimientos** – Visualiza todas tus transacciones con opción de eliminar
+- **🗂️ Pestañas de navegación** – Acceso rápido a todas las secciones
 
 ### 📊 Visualización de Datos
 - **Gráfico de gastos por categoría** – Entiende dónde va tu dinero
 - **🏆 Indicadores inteligentes:**
   - Categoría donde más gastaste
   - Top 3 categorías del mes
+
+### 💰 Gestión Presupuestaria (NUEVO)
+- **📈 Establecer límites presupuestarios** por categoría
+- **⚠️ Alertas visuales** cuando te acercas al límite
+- **📊 Progreso mensual** por categoría
+- **🔄 Restablecimiento automático** al cambiar de mes
+
+### 🎯 Metas de Ahorro (NUEVO)
+- **🏆 Crear metas personalizadas** con montos objetivo
+- **📈 Seguimiento del progreso** en tiempo real
+- **🎉 Indicadores de cumplimiento** visuales
+- **🗑️ Gestión de metas** (crear, editar, eliminar)
 
 ### 💾 Gestión de Datos
 - **Persistencia automática** – Los datos se guardan en localStorage
@@ -49,22 +63,24 @@ Aplicación web moderna y funcional para el manejo integral de tu presupuesto pe
 
 ### ➕ Entrada de Datos Flexible
 - Registra **ingresos** y **gastos**
-- Selecciona **categorías predefinidas**
+- Selecciona **11+ categorías predefinidas** (Salario, Comida, Transporte, etc.)
 - Incluye **fecha y descripción** en cada movimiento
+- **Moneda soportada**: Colones costarricenses (CRC)
 
 ---
 
 ## 🛠️ Stack Tecnológico
 
-| Tecnología | Propósito |
-|-----------|----------|
-| **React 18** | Framework UI moderna |
-| **Vite** | Build tool rápido y eficiente |
-| **TypeScript** | Tipado estático seguro |
-| **Tailwind CSS** | Estilos responsive y modernos |
-| **Recharts** | Gráficos interactivos y accesibles |
-| **localStorage API** | Persistencia de datos en navegador |
-| **Playwright** | Testing E2E |
+| Tecnología | Versión | Propósito |
+|-----------|---------|----------|
+| **React** | 18.3 | Framework UI moderna |
+| **Vite** | 5.1 | Build tool rápido y eficiente |
+| **TypeScript** | 5.6 | Tipado estático seguro |
+| **Tailwind CSS** | 3.4 | Estilos responsive y modernos |
+| **Recharts** | Latest | Gráficos interactivos y accesibles |
+| **React Router** | v6 | Navegación multi-página |
+| **localStorage API** | Native | Persistencia de datos en navegador |
+| **Playwright** | Latest | Testing E2E |
 
 ---
 
@@ -119,25 +135,45 @@ npm run lint     # Valida el código
 ## 🧱 Estructura del Proyecto
 
 ```
-src/
-├── components/              # Componentes React reutilizables
-│   ├── MonthPicker.tsx      # Navegación entre meses
-│   ├── SummaryCards.tsx     # Tarjetas de resumen (ingresos, gastos, balance)
-│   ├── TransactionForm.tsx  # Formulario para agregar movimientos
-│   ├── TransactionList.tsx  # Listado de transacciones
-│   └── CategoryChart.tsx    # Gráfico de gastos por categoría
-├── hooks/                   # Custom hooks
-│   └── useLocalStorage.ts   # Hook para persistencia de datos
-├── types/                   # Definiciones TypeScript
-│   └── transaction.ts       # Interfaz de transacción
-├── utils/                   # Funciones utilitarias
-│   ├── date.ts             # Utilidades de fechas
-│   └── format.ts           # Utilidades de formato (moneda, etc)
-├── App.tsx                  # Componente principal
-└── main.tsx                 # Punto de entrada
-
-tests/                        # Tests E2E con Playwright
-public/                       # Archivos estáticos
+budget-demo/
+├── src/
+│   ├── components/              # Componentes React reutilizables
+│   │   ├── MonthPicker.tsx      # Navegación entre meses
+│   │   ├── SummaryCards.tsx     # Tarjetas de resumen (ingresos, gastos, balance)
+│   │   ├── TransactionForm.tsx  # Formulario para agregar movimientos
+│   │   ├── TransactionList.tsx  # Listado de transacciones
+│   │   ├── CategoryChart.tsx    # Gráfico de gastos por categoría
+│   │   ├── BudgetManager.tsx    # Gestor de límites presupuestarios
+│   │   ├── GoalsManager.tsx     # Gestor de metas de ahorro
+│   │   ├── NavTabs.tsx          # Navegación entre secciones
+│   │   └── Modal.tsx            # Componente modal reutilizable
+│   ├── pages/                   # Páginas de la aplicación
+│   │   ├── DashboardPage.tsx    # Dashboard principal
+│   │   ├── GastosPage.tsx       # Página de gestión de gastos
+│   │   ├── PresupuestoPage.tsx  # Página de presupuestos
+│   │   └── MetasPage.tsx        # Página de metas de ahorro
+│   ├── hooks/                   # Custom hooks
+│   │   └── useLocalStorage.ts   # Hook para persistencia de datos
+│   ├── types/                   # Definiciones TypeScript
+│   │   ├── transaction.ts       # Interfaz de transacción
+│   │   ├── budget.ts            # Interfaz de presupuesto
+│   │   └── goal.ts              # Interfaz de meta
+│   ├── utils/                   # Funciones utilitarias
+│   │   ├── date.ts             # Utilidades de fechas
+│   │   ├── format.ts           # Utilidades de formato
+│   │   └── money.ts            # Utilidades de moneda (CRC)
+│   ├── assets/                  # Recursos estáticos
+│   ├── App.tsx                  # Componente principal con routing
+│   ├── App.css                  # Estilos de App
+│   ├── index.css                # Estilos globales
+│   └── main.tsx                 # Punto de entrada
+├── public/                      # Archivos estáticos
+├── tests/                       # Tests E2E con Playwright
+├── vite.config.ts              # Configuración Vite
+├── tsconfig.json               # Configuración TypeScript
+├── tailwind.config.cjs         # Configuración Tailwind CSS
+├── eslint.config.js            # Configuración ESLint
+└── package.json                # Dependencias y scripts
 ```
 
 ### Componentes Principales
@@ -149,6 +185,27 @@ public/                       # Archivos estáticos
 | `TransactionForm` | Formulario para registrar nuevos movimientos |
 | `TransactionList` | Listado con capacidad de eliminar transacciones |
 | `CategoryChart` | Gráfico Recharts de gastos por categoría |
+| `BudgetManager` | Establece y gestiona límites presupuestarios por categoría |
+| `GoalsManager` | Crea y monitorea metas de ahorro |
+| `NavTabs` | Navegación por pestañas entre secciones |
+| `Modal` | Componente modal reutilizable para diálogos |
+
+### Páginas de la Aplicación
+
+| Página | Propósito | Características |
+|--------|-----------|-----------------|
+| `DashboardPage` | Vista general del presupuesto | Resumen, gráficos, indicadores |
+| `GastosPage` | Gestión completa de transacciones | Formulario, listado, eliminación |
+| `PresupuestoPage` | Configuración y monitoreo de presupuestos | Establecer límites, alertas, progreso |
+| `MetasPage` | Creación y seguimiento de metas de ahorro | Crear metas, seguimiento, progreso |
+
+### Tipos de Datos
+
+| Tipo | Contenido |
+|------|-----------|
+| `Transaction` | Movimiento (ingreso/gasto) con categoría |
+| `BudgetLimit` | Límite presupuestario por categoría |
+| `Goal` | Meta de ahorro con progreso |
 
 ---
 
@@ -170,14 +227,33 @@ npm run test
 
 ## 💡 Cómo Usar
 
+### 📊 Dashboard Principal
+1. Abre la aplicación y verás el dashboard con resumen de ingresos/gastos
+2. Usa el selector de mes para ver datos de diferentes períodos
+3. Visualiza el gráfico de gastos por categoría
+
 ### Registrar un Gasto
-1. Selecciona el mes (si es necesario)
+1. Ve a la pestaña **"Gastos"**
 2. Llena el formulario con descripción, monto y categoría
-3. Selecciona "Gasto" como tipo
-4. Haz clic en "Agregar"
+3. Selecciona **"Gasto"** como tipo (o "Ingreso" según corresponda)
+4. Haz clic en **"Agregar"**
+
+### 💰 Gestionar Presupuestos
+1. Ve a la pestaña **"Presupuesto"**
+2. Haz clic en **"Establecer Límite"** para una categoría
+3. Ingresa el monto máximo mensual
+4. El sistema muestra tu progreso y alerta si te acercas al límite
+5. Los límites se reinician automáticamente cada mes
+
+### 🎯 Crear Metas de Ahorro
+1. Ve a la pestaña **"Metas"**
+2. Haz clic en **"Nueva Meta"**
+3. Ingresa nombre de la meta y monto objetivo
+4. El sistema rastrea tu progreso automáticamente
+5. Recibe retroalimentación visual cuando logres la meta
 
 ### Filtrar por Mes
-- Usa los botones **<** y **>** para navegar entre meses
+- Usa los botones **<** y **>** en cualquier sección para navegar entre meses
 - Los datos se actualizan automáticamente
 
 ### Limpiar Datos
@@ -191,11 +267,16 @@ npm run test
 Este proyecto demuestra:
 
 - **Custom Hooks**: `useLocalStorage` para abstraer la persistencia
-- **TypeScript**: Interfaces tipadas para seguridad
+- **TypeScript**: Interfaces tipadas para seguridad (`Transaction`, `BudgetLimit`, `Goal`)
 - **Componentes Reutilizables**: Cada componente tiene una responsabilidad clara
 - **Tailwind CSS**: Diseño responsive y moderno sin CSS personalizado
 - **Hooks Nativos**: `useState`, `useEffect` para lógica de estado
 - **Testing**: Validación de flujos críticos con Playwright
+- **React Router**: Navegación multi-página y sincronización de estado
+- **Gestión de Estado Global**: Persistencia de datos complejos
+- **Patrones de Componentes**: Componentes controlados y no controlados
+- **Modales Reutilizables**: Componente Modal para diálogos flexibles
+- **Formatos de Moneda**: Manejo de CRC con formato local
 
 ---
 
@@ -238,6 +319,38 @@ Este proyecto demuestra:
 ```
 - Props: `transactions` (Transaction[])
 
+### BudgetManager (NUEVO)
+```tsx
+// Gestiona límites presupuestarios por categoría
+<BudgetManager budgets={budgets} onSave={handleSave} />
+```
+- Props: `budgets` (BudgetLimit[]), `onSave` (function)
+- Permite: Establecer, editar y eliminar límites por categoría
+
+### GoalsManager (NUEVO)
+```tsx
+// Crea y monitorea metas de ahorro
+<GoalsManager goals={goals} transactions={transactions} onSave={handleSave} />
+```
+- Props: `goals` (Goal[]), `transactions` (Transaction[]), `onSave` (function)
+- Permite: Crear, editar, eliminar y seguir metas de ahorro
+
+### NavTabs (NUEVO)
+```tsx
+// Navegación por pestañas entre secciones
+<NavTabs currentTab={tab} onTabChange={setTab} />
+```
+- Props: `currentTab` (string), `onTabChange` (function)
+- Tabs: Dashboard, Gastos, Presupuesto, Metas
+
+### Modal (NUEVO)
+```tsx
+// Componente modal reutilizable
+<Modal isOpen={open} onClose={handleClose} title="Título">
+  {/* contenido */}
+</Modal>
+```
+- Props: `isOpen` (boolean), `onClose` (function), `title` (string), `children` (React.ReactNode)
 ---
 
 ## 🔧 Configuración del Proyecto
@@ -254,6 +367,15 @@ Estilos customizados en [tailwind.config.cjs](tailwind.config.cjs) para tema con
 ### ESLint
 Reglas de linting configuradas en [eslint.config.js](eslint.config.js).
 
+### Routing
+La aplicación usa **React Router** para navegación entre páginas:
+- `/` - Dashboard principal
+- `/gastos` - Gestión de transacciones
+- `/presupuesto` - Configuración de presupuestos
+- `/metas` - Gestión de metas de ahorro
+
+La navegación se realiza mediante el componente `NavTabs` que sincroniza con la URL.
+
 ---
 
 ## 📱 Responsividad
@@ -267,6 +389,28 @@ Usa Tailwind CSS responsive classes para garantizar vista óptima en todos los d
 
 ---
 
+---
+
+## 📂 Categorías Disponibles
+
+La aplicación soporta las siguientes categorías de gasto:
+
+| Categoría | Código | Descripción |
+|-----------|--------|-------------|
+| 💰 Salario | `salary` | Ingresos principales |
+| 🍔 Comida | `food` | Alimentos y restaurantes |
+| 🚗 Transporte | `transport` | Combustible, transporte público, uber |
+| 🏠 Vivienda | `housing` | Renta, hipoteca, mantenimiento |
+| 💡 Servicios | `utilities` | Agua, luz, internet, teléfono |
+| 🛍️ Compras | `shopping` | Ropa, accesorios, otros artículos |
+| 🎬 Entretenimiento | `entertainment` | Cine, eventos, ocio |
+| 🏥 Salud | `health` | Médicos, medicinas, gym |
+| 📚 Educación | `education` | Cursos, libros, educación |
+| 🏦 Ahorro | `savings` | Transferencias a ahorros |
+| 📦 Otros | `other` | Gastos no categorizados |
+
+---
+
 ## 🎨 Tema y Colores
 
 | Elemento | Color | Uso |
@@ -274,6 +418,8 @@ Usa Tailwind CSS responsive classes para garantizar vista óptima en todos los d
 | Ingresos | Verde | Números positivos |
 | Gastos | Rojo | Números negativos |
 | Balance | Azul | Saldo total |
+| Alertas | Naranja/Amarillo | Acercarse a límite |
+| Éxito | Verde claro | Meta cumplida |
 | Fondo | Gris claro | Contraste visual |
 
 ---
@@ -350,13 +496,25 @@ Si tienes problemas:
 
 ## 🚀 Próximos Pasos (Ideas)
 
-- [ ] Exportar datos a CSV
-- [ ] Presupuestos mensuales por categoría
-- [ ] Metas de ahorro
-- [ ] Sincronización en la nube
-- [ ] App móvil con React Native
+### ✅ Ya Implementado
+- [x] Gestión de límites presupuestarios por categoría
+- [x] Sistema de metas de ahorro
+- [x] Navegación por pestañas/secciones
+- [x] Componente Modal reutilizable
+- [x] Múltiples páginas (Dashboard, Gastos, Presupuesto, Metas)
+- [x] Soporte para moneda CRC
+
+### 🔜 Por Implementar
+- [ ] Exportar datos a CSV/PDF
+- [ ] Sincronización en la nube (Firebase)
 - [ ] Análisis comparativo entre meses
-- [ ] Notificaciones de gastos límite
+- [ ] Notificaciones push de gastos límite
+- [ ] Gráficos de tendencias mensuales
+- [ ] Categorización automática con IA
+- [ ] App móvil con React Native
+- [ ] Sistema de recibos/facturas
+- [ ] Presupuestos compartidos (multi-usuario)
+- [ ] Integración con bancos
 
 ---
 
