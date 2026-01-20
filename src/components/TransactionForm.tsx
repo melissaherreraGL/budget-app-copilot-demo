@@ -12,10 +12,7 @@ interface TransactionFormProps {
   defaultDate: string;
 }
 
-export default function TransactionForm({
-  onAdd,
-  defaultDate,
-}: TransactionFormProps) {
+export default function TransactionForm({ onAdd, defaultDate }: TransactionFormProps) {
   const [type, setType] = useState<"income" | "expense">("expense");
   const [amount, setAmount] = useState("");
   const [category, setCategory] = useState("food");
@@ -24,12 +21,14 @@ export default function TransactionForm({
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!amount || parseFloat(amount) <= 0) return;
+    const n = Number(amount);
+
+    if (!Number.isFinite(n) || n <= 0) return;
 
     const tx: Transaction = {
       id: crypto?.randomUUID?.() ?? `tx-${Date.now()}`,
       type,
-      amount: parseFloat(amount),
+      amount: Math.round(n), // ✅ Colones: sin decimales
       category,
       date,
       note,
@@ -58,8 +57,9 @@ export default function TransactionForm({
             data-testid="transaction-type"
             value={type}
             onChange={(e) => {
-              setType(e.target.value as "income" | "expense");
-              setCategory(e.target.value === "income" ? "salary" : "food");
+              const newType = e.target.value as "income" | "expense";
+              setType(newType);
+              setCategory(newType === "income" ? "salary" : "food");
             }}
             className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-400"
           >
@@ -70,11 +70,8 @@ export default function TransactionForm({
 
         {/* Monto */}
         <div>
-          <label
-            htmlFor="amount"
-            className="block text-xs font-medium text-slate-600 mb-2"
-          >
-            Monto
+          <label htmlFor="amount" className="block text-xs font-medium text-slate-600 mb-2">
+            Monto (₡)
           </label>
 
           <input
@@ -82,13 +79,14 @@ export default function TransactionForm({
             name="amount"
             data-testid="amount"
             type="number"
-            step="0.01"
+            step="1" // ✅ enteros
             min="0"
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
-            placeholder="0.00"
+            placeholder="0"
             className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400"
           />
+          <div className="mt-1 text-xs text-slate-500">Colones (CRC). Ej: 25000</div>
         </div>
 
         {/* Categoría */}
@@ -118,10 +116,7 @@ export default function TransactionForm({
 
         {/* Fecha */}
         <div>
-          <label
-            htmlFor="date"
-            className="block text-xs font-medium text-slate-600 mb-2"
-          >
+          <label htmlFor="date" className="block text-xs font-medium text-slate-600 mb-2">
             Fecha
           </label>
 
@@ -139,10 +134,7 @@ export default function TransactionForm({
 
       {/* Nota */}
       <div>
-        <label
-          htmlFor="note"
-          className="block text-xs font-medium text-slate-600 mb-2"
-        >
+        <label htmlFor="note" className="block text-xs font-medium text-slate-600 mb-2">
           Nota (opcional)
         </label>
 

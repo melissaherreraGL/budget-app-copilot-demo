@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Navigate, Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes, useNavigate } from "react-router-dom";
 
 import MonthPicker from "./components/MonthPicker";
 import SummaryCards from "./components/SummaryCards";
@@ -9,23 +9,23 @@ import CategoryChart from "./components/CategoryChart";
 import { NavTabs } from "./components/NavTabs";
 import { Modal } from "./components/Modal";
 import { BudgetManager } from "./components/BudgetManager";
+import { GoalsManager } from "./components/GoalsManager";
 
 import { useLocalStorage } from "./hooks/useLocalStorage";
 import type { Transaction } from "./types/transaction";
 import type { BudgetLimit } from "./types/budget";
+import type { Goal } from "./types/goal";
 import { toMonthKey } from "./utils/date";
+import { formatCRC } from "./utils/money";
 
-// ✅ helper para calcular el mes anterior a partir de "YYYY-MM"
 function prevMonthKey(monthKey: string) {
   const [yStr, mStr] = monthKey.split("-");
   const y = Number(yStr);
-  const m = Number(mStr); // 1..12
-
+  const m = Number(mStr);
   if (m === 1) return `${y - 1}-12`;
   return `${y}-${String(m - 1).padStart(2, "0")}`;
 }
 
-// ✅ "Nombres bonitos" para el demo
 const CATEGORY_LABELS: Record<string, string> = {
   salary: "Salario",
   food: "Comida",
@@ -44,23 +44,17 @@ function prettyCategory(key: string) {
   return CATEGORY_LABELS[key] ?? key;
 }
 
-function formatMoney(n: number) {
-  return `$${n.toFixed(2)}`;
+function clamp01(x: number) {
+  if (x < 0) return 0;
+  if (x > 1) return 1;
+  return x;
 }
 
-function PageTitle({
-  title,
-  subtitle,
-}: {
-  title: string;
-  subtitle?: string;
-}) {
+function PageTitle({ title, subtitle }: { title: string; subtitle?: string }) {
   return (
     <div className="mb-2">
       <h2 className="text-lg font-medium tracking-tight">{title}</h2>
-      {subtitle ? (
-        <p className="text-slate-500 text-sm mt-1">{subtitle}</p>
-      ) : null}
+      {subtitle ? <p className="text-slate-500 text-sm mt-1">{subtitle}</p> : null}
     </div>
   );
 }
@@ -83,10 +77,7 @@ function AlertCard({
         {items.map((a, idx) => {
           const icon = a.kind === "danger" ? "🚨" : a.kind === "warn" ? "⚠️" : "✅";
           return (
-            <div
-              key={idx}
-              className="rounded-xl border border-slate-200 px-3 py-2"
-            >
+            <div key={idx} className="rounded-xl border border-slate-200 px-3 py-2">
               <div className="text-sm font-medium text-slate-900">
                 {icon} {a.title}
               </div>
@@ -99,30 +90,90 @@ function AlertCard({
   );
 }
 
+function GoalsMiniCard({ month, balance, goals }: { month: string; balance: number; goals: Goal[] }) {
+  const navigate = useNavigate();
+
+  const goal = useMemo(() => {
+    return goals.find((g) => g.month === month && g.type === "savings") ?? null;
+  }, [goals, month]);
+
+  const target = goal?.target ?? 0;
+
+  const ratio = useMemo(() => {
+    if (!goal || target <= 0) return 0;
+    return balance / target;
+  }, [goal, balance, target]);
+
+  const pct = Math.round(clamp01(ratio) * 100);
+
+  const status = useMemo(() => {
+    if (!goal || target <= 0) return "none";
+    if (balance >= target) return "done";
+    if (balance >= target * 0.8) return "near";
+    return "progress";
+  }, [goal, target, balance]);
+
+  const icon =
+    status === "done" ? "✅" : status === "near" ? "⚠️" : status === "progress" ? "🎯" : "•";
+
+  const title =
+    status === "done"
+      ? "Meta lograda"
+      : status === "near"
+      ? "Cerca de tu meta"
+      : status === "progress"
+      ? "Meta en progreso"
+      : "Define una meta";
+
+  const detail =
+    status === "none"
+      ? "Configura tu meta de ahorro para ver el progreso aquí."
+      : `Balance: ${formatCRC(balance)} · Meta: ${formatCRC(target)} · ${pct}%`;
+
+  return (
+    <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-4">
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <div className="text-sm font-medium">{icon} Progreso de meta</div>
+          <div className="mt-1 text-xs text-slate-500">{title}</div>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => navigate("/metas")}
+          className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs text-slate-600 hover:bg-slate-100 transition"
+        >
+          Ver Metas
+        </button>
+      </div>
+
+      <div className="mt-3 text-sm text-slate-800">{detail}</div>
+
+      <div className="mt-3">
+        <div className="h-2 w-full rounded-full bg-slate-100 border border-slate-200 overflow-hidden">
+          <div className="h-2 bg-slate-900" style={{ width: `${pct}%` }} />
+        </div>
+        <div className="mt-1 text-xs text-slate-500">{pct}%</div>
+      </div>
+    </div>
+  );
+}
+
 export default function App() {
   const [month, setMonth] = useState<string>(() => toMonthKey(new Date()));
-  const [transactions, setTransactions] = useLocalStorage<Transaction[]>(
-    "budget.transactions",
-    []
-  );
+  const [transactions, setTransactions] = useLocalStorage<Transaction[]>("budget.transactions", []);
 
-  // ✅ Etapa 3: presupuestos en localStorage
-  const [budgetLimits, setBudgetLimits] = useLocalStorage<BudgetLimit[]>(
-    "budget.limits",
-    []
-  );
+  const [budgetLimits, setBudgetLimits] = useLocalStorage<BudgetLimit[]>("budget.limits", []);
+  const [goals, setGoals] = useLocalStorage<Goal[]>("budget.goals", []);
 
-  // ✅ modal para "Agregar" desde cualquier tab
   const [addOpen, setAddOpen] = useState(false);
 
-  // Mes actual: transacciones filtradas
   const monthTransactions = useMemo(() => {
     return transactions
       .filter((t) => t.date.slice(0, 7) === month)
       .sort((a, b) => (a.date < b.date ? 1 : -1));
   }, [transactions, month]);
 
-  // Mes actual: totales
   const totals = useMemo(() => {
     let income = 0;
     let expense = 0;
@@ -132,31 +183,22 @@ export default function App() {
       if (t.type === "expense") expense += t.amount;
     }
 
-    return {
-      income,
-      expense,
-      balance: income - expense,
-    };
+    return { income, expense, balance: income - expense };
   }, [monthTransactions]);
 
-  // Mes anterior (YYYY-MM)
   const prevMonth = useMemo(() => prevMonthKey(month), [month]);
 
-  // Transacciones del mes anterior
   const prevMonthTransactions = useMemo(() => {
     return transactions.filter((t) => t.date.slice(0, 7) === prevMonth);
   }, [transactions, prevMonth]);
 
-  // Totales del mes anterior
   const prevTotals = useMemo(() => {
     let income = 0;
     let expense = 0;
-
     for (const t of prevMonthTransactions) {
       if (t.type === "income") income += t.amount;
       if (t.type === "expense") expense += t.amount;
     }
-
     return { income, expense };
   }, [prevMonthTransactions]);
 
@@ -181,51 +223,16 @@ export default function App() {
       {
         id: crypto?.randomUUID?.() ?? `demo-${Date.now()}-1`,
         type: "income",
-        amount: 1500,
+        amount: 1500000,
         category: "salary",
         date: `${month}-01`,
         note: "Salario",
       },
-      {
-        id: crypto?.randomUUID?.() ?? `demo-${Date.now()}-2`,
-        type: "expense",
-        amount: 220,
-        category: "food",
-        date: `${month}-03`,
-        note: "Supermercado",
-      },
-      {
-        id: crypto?.randomUUID?.() ?? `demo-${Date.now()}-3`,
-        type: "expense",
-        amount: 60,
-        category: "transport",
-        date: `${month}-05`,
-        note: "Gasolina",
-      },
-      {
-        id: crypto?.randomUUID?.() ?? `demo-${Date.now()}-4`,
-        type: "expense",
-        amount: 120,
-        category: "utilities",
-        date: `${month}-07`,
-        note: "Internet",
-      },
-      {
-        id: crypto?.randomUUID?.() ?? `demo-${Date.now()}-5`,
-        type: "expense",
-        amount: 180,
-        category: "shopping",
-        date: `${month}-10`,
-        note: "Compras",
-      },
-      {
-        id: crypto?.randomUUID?.() ?? `demo-${Date.now()}-6`,
-        type: "expense",
-        amount: 90,
-        category: "entertainment",
-        date: `${month}-12`,
-        note: "Cine / streaming",
-      },
+      { id: crypto?.randomUUID?.() ?? `demo-${Date.now()}-2`, type: "expense", amount: 220000, category: "food", date: `${month}-03`, note: "Supermercado" },
+      { id: crypto?.randomUUID?.() ?? `demo-${Date.now()}-3`, type: "expense", amount: 60000, category: "transport", date: `${month}-05`, note: "Gasolina" },
+      { id: crypto?.randomUUID?.() ?? `demo-${Date.now()}-4`, type: "expense", amount: 120000, category: "utilities", date: `${month}-07`, note: "Internet" },
+      { id: crypto?.randomUUID?.() ?? `demo-${Date.now()}-5`, type: "expense", amount: 180000, category: "shopping", date: `${month}-10`, note: "Compras" },
+      { id: crypto?.randomUUID?.() ?? `demo-${Date.now()}-6`, type: "expense", amount: 90000, category: "entertainment", date: `${month}-12`, note: "Cine / streaming" },
     ];
 
     setTransactions((prev) => [...demo, ...prev]);
@@ -238,10 +245,10 @@ export default function App() {
     if (confirmed) {
       setTransactions([]);
       setBudgetLimits([]);
+      setGoals([]);
     }
   }
 
-  // ✅ Insight “aha” — Top 3 categorías + comparación vs mes anterior (con nombres bonitos)
   const topCategoriesInsight = useMemo(() => {
     const curr = new Map<string, number>();
     const prev = new Map<string, number>();
@@ -260,14 +267,7 @@ export default function App() {
       .map(([category, amount]) => {
         const prevAmount = prev.get(category) ?? 0;
         const delta = amount - prevAmount;
-
-        return {
-          category,
-          categoryLabel: prettyCategory(category),
-          amount,
-          prevAmount,
-          delta,
-        };
+        return { category, categoryLabel: prettyCategory(category), amount, prevAmount, delta };
       })
       .sort((a, b) => b.amount - a.amount)
       .slice(0, 3);
@@ -278,38 +278,25 @@ export default function App() {
       hasAny,
       rows,
       title: "Insight",
-      subtitle: hasAny
-        ? "Tus 3 categorías con más gasto este mes"
-        : "Aún no hay gastos este mes",
-      hint: hasAny
-        ? `Comparación contra ${prevMonth}`
-        : "Tip: usa “+ Agregar” para registrar un gasto rápido.",
+      subtitle: hasAny ? "Tus 3 categorías con más gasto este mes" : "Aún no hay gastos este mes",
+      hint: hasAny ? `Comparación contra ${prevMonth}` : "Tip: usa “+ Agregar” para registrar un gasto rápido.",
     };
   }, [monthTransactions, prevMonthTransactions, prevMonth]);
 
-  // ✅ Etapa 3: filtra presupuestos del mes actual
-  const monthBudgets = useMemo(() => {
-    return budgetLimits.filter((b) => b.month === month);
-  }, [budgetLimits, month]);
+  const monthBudgets = useMemo(() => budgetLimits.filter((b) => b.month === month), [budgetLimits, month]);
 
   function upsertBudget(entry: BudgetLimit) {
     setBudgetLimits((prev) => {
-      const filtered = prev.filter(
-        (b) => !(b.month === entry.month && b.category === entry.category)
-      );
+      const filtered = prev.filter((b) => !(b.month === entry.month && b.category === entry.category));
       return [entry, ...filtered];
     });
   }
 
   function deleteBudget(monthKey: string, category: string) {
-    setBudgetLimits((prev) =>
-      prev.filter((b) => !(b.month === monthKey && b.category === category))
-    );
+    setBudgetLimits((prev) => prev.filter((b) => !(b.month === monthKey && b.category === category)));
   }
 
-  // ✅ Etapa 3.5: alertas automáticas en Dashboard (basadas en presupuesto)
   const budgetAlerts = useMemo(() => {
-    // gastos por categoría (solo expenses)
     const spent = new Map<string, number>();
     for (const t of monthTransactions) {
       if (t.type !== "expense") continue;
@@ -318,7 +305,6 @@ export default function App() {
 
     const alerts: { kind: "danger" | "warn" | "ok"; title: string; detail: string }[] = [];
 
-    // Solo alertamos categorías que tengan presupuesto > 0
     for (const b of monthBudgets) {
       if (!Number.isFinite(b.limit) || b.limit <= 0) continue;
 
@@ -330,31 +316,38 @@ export default function App() {
         alerts.push({
           kind: "danger",
           title: `Excediste ${prettyCategory(b.category)}`,
-          detail: `Gastaste ${formatMoney(s)} de ${formatMoney(b.limit)} (restante ${formatMoney(remaining)}).`,
+          detail: `Gastaste ${formatCRC(s)} de ${formatCRC(b.limit)} (restante ${formatCRC(remaining)}).`,
         });
       } else if (ratio >= 0.8) {
         alerts.push({
           kind: "warn",
           title: `Cerca del límite en ${prettyCategory(b.category)}`,
-          detail: `Vas en ${(ratio * 100).toFixed(0)}% — te quedan ${formatMoney(remaining)}.`,
+          detail: `Vas en ${(ratio * 100).toFixed(0)}% — te quedan ${formatCRC(remaining)}.`,
         });
       } else if (ratio <= 0.5 && s > 0) {
-        // “Ok” solo si hay algo de gasto (si no, se siente raro)
         alerts.push({
           kind: "ok",
           title: `Vas bien en ${prettyCategory(b.category)}`,
-          detail: `Solo usaste ${(ratio * 100).toFixed(0)}% — te quedan ${formatMoney(remaining)}.`,
+          detail: `Solo usaste ${(ratio * 100).toFixed(0)}% — te quedan ${formatCRC(remaining)}.`,
         });
       }
     }
 
-    // Orden: danger, warn, ok. Luego por mayor % usado
     const kindOrder = { danger: 0, warn: 1, ok: 2 } as const;
     alerts.sort((a, b) => kindOrder[a.kind] - kindOrder[b.kind]);
-
-    // Limitar para que se vea limpio
     return alerts.slice(0, 4);
   }, [monthTransactions, monthBudgets]);
+
+  function upsertGoal(goal: Goal) {
+    setGoals((prev) => {
+      const filtered = prev.filter((g) => !(g.month === goal.month && g.type === goal.type));
+      return [goal, ...filtered];
+    });
+  }
+
+  function deleteGoal(monthKey: string, type: Goal["type"]) {
+    setGoals((prev) => prev.filter((g) => !(g.month === monthKey && g.type === type)));
+  }
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900">
@@ -394,7 +387,6 @@ export default function App() {
       </header>
 
       <main className="max-w-5xl mx-auto px-6 py-10 relative">
-        {/* CTA persistente */}
         <div className="fixed bottom-6 right-6 z-40">
           <button
             type="button"
@@ -405,12 +397,7 @@ export default function App() {
           </button>
         </div>
 
-        {/* Modal para agregar transacción */}
-        <Modal
-          open={addOpen}
-          title="Agregar transacción"
-          onClose={() => setAddOpen(false)}
-        >
+        <Modal open={addOpen} title="Agregar transacción" onClose={() => setAddOpen(false)}>
           <TransactionForm onAdd={addTransaction} defaultDate={defaultDate} />
         </Modal>
 
@@ -423,10 +410,10 @@ export default function App() {
               <div className="space-y-10">
                 <PageTitle title="Dashboard" subtitle="Resumen del mes y categorías" />
 
-                {/* ✅ Etapa 3.5: alertas */}
+                <GoalsMiniCard month={month} balance={totals.balance} goals={goals} />
+
                 <AlertCard items={budgetAlerts} />
 
-                {/* Insight Top 3 */}
                 <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-4">
                   <div className="text-sm font-medium">{topCategoriesInsight.title}</div>
                   <div className="mt-1 text-xs text-slate-500">{topCategoriesInsight.subtitle}</div>
@@ -442,9 +429,7 @@ export default function App() {
                             ? `Sin historial en ${prevMonth}`
                             : r.delta === 0
                             ? `Igual que ${prevMonth}`
-                            : `${formatMoney(Math.abs(r.delta))} ${
-                                r.delta > 0 ? "más" : "menos"
-                              } que ${prevMonth}`;
+                            : `${formatCRC(Math.abs(r.delta))} ${r.delta > 0 ? "más" : "menos"} que ${prevMonth}`;
 
                         return (
                           <div
@@ -466,7 +451,7 @@ export default function App() {
                             </div>
 
                             <div className="text-sm font-semibold text-slate-900">
-                              {formatMoney(r.amount)}
+                              {formatCRC(r.amount)}
                             </div>
                           </div>
                         );
@@ -501,14 +486,8 @@ export default function App() {
             element={
               <div className="space-y-10">
                 <PageTitle title="Gastos" subtitle="Agrega y administra tus transacciones" />
-
-                {/* Mantengo el form aquí también */}
                 <TransactionForm onAdd={addTransaction} defaultDate={defaultDate} />
-
-                <TransactionList
-                  transactions={monthTransactions}
-                  onDelete={deleteTransaction}
-                />
+                <TransactionList transactions={monthTransactions} onDelete={deleteTransaction} />
               </div>
             }
           />
@@ -518,7 +497,6 @@ export default function App() {
             element={
               <div className="space-y-6">
                 <PageTitle title="Presupuesto" subtitle="Límites por categoría y progreso" />
-
                 <BudgetManager
                   month={month}
                   monthTransactions={monthTransactions}
@@ -533,12 +511,15 @@ export default function App() {
           <Route
             path="/metas"
             element={
-              <div className="space-y-4">
-                <PageTitle title="Metas" subtitle="Próxima etapa: meta de ahorro mensual" />
-                <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 text-slate-600">
-                  En la siguiente etapa vamos a agregar una meta mensual (ej: ahorrar $200) y mostrar
-                  el progreso basado en (ingresos - gastos).
-                </div>
+              <div className="space-y-6">
+                <PageTitle title="Metas" subtitle="Ahorro mensual y progreso" />
+                <GoalsManager
+                  month={month}
+                  balance={totals.balance}
+                  goals={goals}
+                  onUpsertGoal={upsertGoal}
+                  onDeleteGoal={deleteGoal}
+                />
               </div>
             }
           />

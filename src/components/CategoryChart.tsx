@@ -1,7 +1,27 @@
 import type { Transaction } from "../types/transaction";
+import { formatCRC } from "../utils/money";
 
 interface CategoryChartProps {
   transactions: Transaction[];
+}
+
+const CATEGORY_LABELS: Record<string, string> = {
+  salary: "Salario",
+  bonus: "Bono",
+  food: "Comida",
+  transport: "Transporte",
+  utilities: "Servicios",
+  shopping: "Compras",
+  entertainment: "Entretenimiento",
+  health: "Salud",
+  education: "Educación",
+  housing: "Vivienda",
+  savings: "Ahorro",
+  other: "Otros",
+};
+
+function prettyCategory(key: string) {
+  return CATEGORY_LABELS[key] ?? key;
 }
 
 export default function CategoryChart({ transactions }: CategoryChartProps) {
@@ -34,19 +54,23 @@ export default function CategoryChart({ transactions }: CategoryChartProps) {
       <h3 className="text-sm font-semibold text-slate-900 mb-6">
         Gastos por categoría
       </h3>
+
       <div className="space-y-4">
         {sorted.map(([category, amount]) => {
-          const percentage = (amount / total) * 100;
+          const percentage = total > 0 ? (amount / total) * 100 : 0;
+
           return (
             <div key={category}>
               <div className="flex justify-between items-center mb-2">
                 <span className="text-xs font-medium text-slate-600 uppercase tracking-wide">
-                  {category}
+                  {prettyCategory(category)}
                 </span>
+
                 <span className="text-sm font-semibold text-slate-900">
-                  ${amount.toFixed(2)}
+                  {formatCRC(amount)}
                 </span>
               </div>
+
               <div className="w-full h-2 rounded-full bg-slate-200 overflow-hidden">
                 <div
                   className="h-full bg-slate-400 transition-all"
@@ -57,6 +81,11 @@ export default function CategoryChart({ transactions }: CategoryChartProps) {
           );
         })}
       </div>
+
+      <p className="mt-4 text-xs text-slate-500">
+        Top 5 categorías (solo gastos). Total mostrado:{" "}
+        <span className="font-medium">{formatCRC(total)}</span>
+      </p>
     </div>
   );
 }

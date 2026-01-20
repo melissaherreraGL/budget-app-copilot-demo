@@ -1,3 +1,5 @@
+import { formatCRC } from "../utils/money";
+
 interface SummaryCardsProps {
   income: number;
   expense: number;
@@ -30,7 +32,7 @@ export default function SummaryCards({
           Ingresos
         </p>
         <p className="text-3xl font-semibold text-slate-900 mt-4">
-          ${income.toFixed(2)}
+          {formatCRC(income)}
         </p>
 
         {incomePct !== null && (
@@ -47,7 +49,7 @@ export default function SummaryCards({
           Gastos
         </p>
         <p className="text-3xl font-semibold text-slate-900 mt-4">
-          ${expense.toFixed(2)}
+          {formatCRC(expense)}
         </p>
 
         {expensePct !== null && (
@@ -68,7 +70,7 @@ export default function SummaryCards({
             balance >= 0 ? "text-slate-900" : "text-red-600"
           }`}
         >
-          ${balance.toFixed(2)}
+          {formatCRC(balance)}
         </p>
         <p
           className={`text-sm font-medium mt-2 ${
