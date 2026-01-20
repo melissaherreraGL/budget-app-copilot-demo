@@ -1,8 +1,24 @@
 # � Budget App – Gestor de Presupuesto Personal
 
+[![React](https://img.shields.io/badge/React-18.3-61dafb?style=flat&logo=react)](https://react.dev)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.6-3178c6?style=flat&logo=typescript)](https://www.typescriptlang.org/)
+[![Vite](https://img.shields.io/badge/Vite-5.1-646cff?style=flat&logo=vite)](https://vitejs.dev)
+[![Tailwind](https://img.shields.io/badge/Tailwind-3.4-38b2ac?style=flat&logo=tailwindcss)](https://tailwindcss.com)
+[![License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
+
 Aplicación web moderna y funcional para el manejo integral de tu presupuesto personal. Construida con **React**, **TypeScript** y **Tailwind CSS**, sin necesidad de backend gracias a `localStorage`.
 
 🎯 **Objetivo:** Registra ingresos y gastos, analiza tus patrones de gasto con gráficos interactivos, y mantén tus datos siempre disponibles localmente en tu navegador.
+
+---
+
+### ⚡ Características Rápidas
+- 🚀 Carga instantánea con Vite
+- 💾 Sin servidor, todo offline
+- 📊 Gráficos interactivos
+- 📱 Totalmente responsive
+- 🔒 Datos privados en tu navegador
+- ⚙️ Tipado completo con TypeScript
 
 ---
 
@@ -183,20 +199,170 @@ Este proyecto demuestra:
 
 ---
 
+---
+
+## 📚 Documentación de Componentes
+
+### MonthPicker
+```tsx
+// Permite navegar entre meses
+<MonthPicker currentMonth={month} onMonthChange={setMonth} />
+```
+- Props: `currentMonth` (Date), `onMonthChange` (function)
+
+### SummaryCards
+```tsx
+// Muestra totales del mes actual
+<SummaryCards transactions={transactions} />
+```
+- Props: `transactions` (Transaction[])
+
+### TransactionForm
+```tsx
+// Formulario para agregar nuevos movimientos
+<TransactionForm onAddTransaction={handleAdd} />
+```
+- Props: `onAddTransaction` (function)
+
+### TransactionList
+```tsx
+// Lista de transacciones con opción de eliminar
+<TransactionList transactions={transactions} onDelete={handleDelete} />
+```
+- Props: `transactions` (Transaction[]), `onDelete` (function)
+
+### CategoryChart
+```tsx
+// Gráfico de gastos por categoría
+<CategoryChart transactions={transactions} />
+```
+- Props: `transactions` (Transaction[])
+
+---
+
+## 🔧 Configuración del Proyecto
+
+### Vite Config
+La configuración está optimizada para desarrollo rápido y build eficiente en [vite.config.ts](vite.config.ts).
+
+### TypeScript
+Configuración strict en [tsconfig.json](tsconfig.json) para máxima seguridad de tipos.
+
+### Tailwind CSS
+Estilos customizados en [tailwind.config.cjs](tailwind.config.cjs) para tema consistente.
+
+### ESLint
+Reglas de linting configuradas en [eslint.config.js](eslint.config.js).
+
+---
+
+## 📱 Responsividad
+
+La aplicación está completamente optimizada para:
+- ✅ **Desktop** (1920px+)
+- ✅ **Tablet** (768px - 1024px)
+- ✅ **Mobile** (320px - 767px)
+
+Usa Tailwind CSS responsive classes para garantizar vista óptima en todos los dispositivos.
+
+---
+
+## 🎨 Tema y Colores
+
+| Elemento | Color | Uso |
+|----------|-------|-----|
+| Ingresos | Verde | Números positivos |
+| Gastos | Rojo | Números negativos |
+| Balance | Azul | Saldo total |
+| Fondo | Gris claro | Contraste visual |
+
+---
+
+## 🚨 Solución de Problemas
+
+### "La app no inicia"
+```bash
+# Solución:
+rm -rf node_modules package-lock.json
+npm install
+npm run dev
+```
+
+### "Los datos no se guardan"
+- Verifica que localStorage esté habilitado en tu navegador
+- Abre DevTools (F12) → Application → Local Storage
+
+### "Errores de tipado TypeScript"
+```bash
+# Compila y verifica errores:
+npm run build
+```
+
+### "Tests E2E fallan"
+```bash
+# Reinstala dependencias de Playwright:
+npm install
+npm run test
+```
+
+---
+
 ## 🤝 Contribuciones
 
 ¿Encontraste un bug o tienes una idea? 
-- Abre un issue o pull request
-- Mejoras en UI/UX bienvenidas
-- Sugerencias para nuevas categorías o funcionalidades
+- 🐛 **Reporta bugs** abriendo un issue detallado
+- 💡 **Sugiere features** con casos de uso específicos
+- 🔧 **Contribuye código** con pull requests bien documentados
+- 📝 **Mejora la documentación** si algo no está claro
+
+### Cómo contribuir
+1. Fork el repositorio
+2. Crea una rama: `git checkout -b feature/tu-feature`
+3. Commit cambios: `git commit -m 'Add tu-feature'`
+4. Push: `git push origin feature/tu-feature`
+5. Abre un Pull Request
 
 ---
 
 ## 📄 Licencia
 
-Este proyecto es de código abierto. Siéntete libre de usarlo, modificarlo y compartirlo.
+MIT License - Este proyecto es completamente de código abierto.
+Siéntete libre de usarlo, modificarlo, distribuir y reutilizar en tus proyectos.
 
 ---
+
+## 👤 Autor
+
+Creado como demo educativo para mostrar mejores prácticas en desarrollo web moderno.
+
+---
+
+## 🙋 Soporte
+
+Si tienes problemas:
+1. ✅ Verifica que tengas **Node.js 16+** instalado (`node --version`)
+2. ✅ Borra `node_modules` y cache: `rm -rf node_modules package-lock.json`
+3. ✅ Reinstala dependencias: `npm install`
+4. ✅ Limpia localStorage: DevTools → Application → Clear All
+5. ❓ Abre un issue con detalles del error y tu entorno
+
+---
+
+## 🚀 Próximos Pasos (Ideas)
+
+- [ ] Exportar datos a CSV
+- [ ] Presupuestos mensuales por categoría
+- [ ] Metas de ahorro
+- [ ] Sincronización en la nube
+- [ ] App móvil con React Native
+- [ ] Análisis comparativo entre meses
+- [ ] Notificaciones de gastos límite
+
+---
+
+**Gracias por usar Budget App** 💚
+
+Si este proyecto te fue útil, considera darle una ⭐ en GitHub.
 
 ## 🙋 Soporte
 
