@@ -151,10 +151,12 @@ export default function TransactionForm({ onAdd, defaultDate }: TransactionFormP
       </div>
 
       <button
-        type="submit"
-        className="w-full md:w-auto rounded-lg bg-slate-900 px-6 py-2 text-sm font-medium text-white hover:bg-slate-800 transition"
-      >
-        Agregar
+    type="submit"
+    data-testid="submit-transaction"
+    aria-label="Agregar gasto"
+    className="w-full md:w-auto rounded-lg bg-slate-900 px-6 py-2 text-sm font-medium text-white hover:bg-slate-800 transition"
+  >
+    Agregar Gasto
       </button>
     </form>
   );

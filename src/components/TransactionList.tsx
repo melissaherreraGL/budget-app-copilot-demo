@@ -25,11 +25,16 @@ interface TransactionListProps {
   onDelete: (id: string) => void;
 }
 
-export default function TransactionList({ transactions, onDelete }: TransactionListProps) {
+export default function TransactionList({
+  transactions,
+  onDelete,
+}: TransactionListProps) {
   if (transactions.length === 0) {
     return (
       <div className="rounded-lg border border-slate-200 bg-slate-50/50 px-6 py-12 text-center">
-        <p className="text-sm text-slate-500">No hay transacciones para este mes</p>
+        <p className="text-sm text-slate-500">
+          No hay transacciones para este mes
+        </p>
       </div>
     );
   }
@@ -41,6 +46,9 @@ export default function TransactionList({ transactions, onDelete }: TransactionL
           key={tx.id}
           data-testid="transaction-row"
           data-transaction-id={tx.id}
+          data-amount={String(tx.amount)}
+          data-category={tx.category}
+          data-type={tx.type}
           className="rounded-lg border border-slate-200 bg-white px-4 py-3 flex items-center justify-between hover:bg-slate-50 transition"
         >
           <div className="flex-1 min-w-0">
