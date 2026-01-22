@@ -48,3 +48,4 @@ await expect(row).toHaveAttribute("data-category", "food");
 await expect(row).toHaveAttribute("data-amount", "5000");
 await expect(row).toHaveAttribute("data-type", "expense");
 });
+

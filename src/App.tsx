@@ -67,17 +67,17 @@ function AlertCard({
   if (items.length === 0) return null;
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-4">
-      <div className="text-sm font-medium">Alertas de presupuesto</div>
-      <div className="mt-1 text-xs text-slate-500">
+    <div data-testid="budget-alerts-card" className="bg-white rounded-2xl shadow-sm border border-slate-200 p-4">
+      <div data-testid="budget-alerts-title" className="text-sm font-medium">Alertas de presupuesto</div>
+      <div data-testid="budget-alerts-subtitle" className="mt-1 text-xs text-slate-500">
         Basado en tus límites por categoría (mes actual)
       </div>
 
-      <div className="mt-4 space-y-2">
+      <div data-testid="budget-alerts-list" className="mt-4 space-y-2">
         {items.map((a, idx) => {
           const icon = a.kind === "danger" ? "🚨" : a.kind === "warn" ? "⚠️" : "✅";
           return (
-            <div key={idx} className="rounded-xl border border-slate-200 px-3 py-2">
+            <div key={idx} data-testid="budget-alert-item" data-kind={a.kind} className="rounded-xl border border-slate-200 px-3 py-2">
               <div className="text-sm font-medium text-slate-900">
                 {icon} {a.title}
               </div>
@@ -131,15 +131,27 @@ function GoalsMiniCard({ month, balance, goals }: { month: string; balance: numb
       : `Balance: ${formatCRC(balance)} · Meta: ${formatCRC(target)} · ${pct}%`;
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-4">
+    <div
+      data-testid="goal-progress-card"
+      data-status={status}
+      data-month={month}
+      data-pct={String(pct)}
+      className="bg-white rounded-2xl shadow-sm border border-slate-200 p-4"
+    >
       <div className="flex items-start justify-between gap-4">
         <div>
-          <div className="text-sm font-medium">{icon} Progreso de meta</div>
-          <div className="mt-1 text-xs text-slate-500">{title}</div>
+          <div data-testid="goal-progress-title" className="text-sm font-medium">
+            {icon} Progreso de meta
+          </div>
+          <div data-testid="goal-progress-subtitle" className="mt-1 text-xs text-slate-500">
+            {title}
+          </div>
         </div>
 
         <button
           type="button"
+          data-testid="go-to-goals"
+          aria-label="Ir a Metas"
           onClick={() => navigate("/metas")}
           className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs text-slate-600 hover:bg-slate-100 transition"
         >
@@ -147,13 +159,30 @@ function GoalsMiniCard({ month, balance, goals }: { month: string; balance: numb
         </button>
       </div>
 
-      <div className="mt-3 text-sm text-slate-800">{detail}</div>
+      <div data-testid="goal-progress-detail" className="mt-3 text-sm text-slate-800">
+        {detail}
+      </div>
 
       <div className="mt-3">
-        <div className="h-2 w-full rounded-full bg-slate-100 border border-slate-200 overflow-hidden">
-          <div className="h-2 bg-slate-900" style={{ width: `${pct}%` }} />
+        <div
+          data-testid="goal-progress-bar"
+          role="progressbar"
+          aria-label="Progreso de meta"
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-valuenow={pct}
+          className="h-2 w-full rounded-full bg-slate-100 border border-slate-200 overflow-hidden"
+        >
+          <div
+            data-testid="goal-progress-bar-fill"
+            className="h-2 bg-slate-900"
+            style={{ width: `${pct}%` }}
+          />
         </div>
-        <div className="mt-1 text-xs text-slate-500">{pct}%</div>
+
+        <div data-testid="goal-progress-percent" className="mt-1 text-xs text-slate-500">
+          {pct}%
+        </div>
       </div>
     </div>
   );
@@ -280,6 +309,7 @@ export default function App() {
       title: "Insight",
       subtitle: hasAny ? "Tus 3 categorías con más gasto este mes" : "Aún no hay gastos este mes",
       hint: hasAny ? `Comparación contra ${prevMonth}` : "Tip: usa “+ Agregar” para registrar un gasto rápido.",
+      compareMonth: prevMonth,
     };
   }, [monthTransactions, prevMonthTransactions, prevMonth]);
 
@@ -390,6 +420,7 @@ export default function App() {
         <div className="fixed bottom-6 right-6 z-40">
           <button
             type="button"
+            data-testid="cta-add-transaction"
             onClick={() => setAddOpen(true)}
             className="rounded-2xl shadow-lg border border-slate-200 bg-slate-900 text-white px-4 py-3 text-sm font-medium hover:bg-slate-800 transition"
           >
@@ -414,43 +445,62 @@ export default function App() {
 
                 <AlertCard items={budgetAlerts} />
 
-                <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-4">
-                  <div className="text-sm font-medium">{topCategoriesInsight.title}</div>
-                  <div className="mt-1 text-xs text-slate-500">{topCategoriesInsight.subtitle}</div>
+                {/* ✅ Insight card con testids + data estable */}
+                <div
+                  data-testid="insight-card"
+                  data-compare-month={topCategoriesInsight.compareMonth}
+                  className="bg-white rounded-2xl shadow-sm border border-slate-200 p-4"
+                >
+                  <div data-testid="insight-title" className="text-sm font-medium">
+                    {topCategoriesInsight.title}
+                  </div>
+                  <div data-testid="insight-subtitle" className="mt-1 text-xs text-slate-500">
+                    {topCategoriesInsight.subtitle}
+                  </div>
 
                   {topCategoriesInsight.hasAny ? (
-                    <div className="mt-4 space-y-2">
+                    <div data-testid="insight-list" className="mt-4 space-y-2">
                       {topCategoriesInsight.rows.map((r, idx) => {
                         const arrow =
                           r.prevAmount === 0 ? "•" : r.delta > 0 ? "▲" : r.delta < 0 ? "▼" : "•";
 
                         const deltaText =
                           r.prevAmount === 0
-                            ? `Sin historial en ${prevMonth}`
+                            ? `Sin historial en ${topCategoriesInsight.compareMonth}`
                             : r.delta === 0
-                            ? `Igual que ${prevMonth}`
-                            : `${formatCRC(Math.abs(r.delta))} ${r.delta > 0 ? "más" : "menos"} que ${prevMonth}`;
+                            ? `Igual que ${topCategoriesInsight.compareMonth}`
+                            : `${formatCRC(Math.abs(r.delta))} ${r.delta > 0 ? "más" : "menos"} que ${
+                                topCategoriesInsight.compareMonth
+                              }`;
 
                         return (
                           <div
                             key={r.category}
+                            data-testid="insight-item"
+                            data-rank={String(idx + 1)}
+                            data-category={r.category}
+                            data-amount={String(Math.round(r.amount))}
+                            data-compare-month={topCategoriesInsight.compareMonth}
                             className="flex items-center justify-between gap-3 rounded-xl border border-slate-200 px-3 py-2"
                           >
                             <div className="flex items-center gap-3">
-                              <div className="w-6 text-center text-sm font-semibold text-slate-700">
+                              <div
+                                data-testid="insight-rank"
+                                className="w-6 text-center text-sm font-semibold text-slate-700"
+                              >
                                 {idx + 1}
                               </div>
                               <div>
-                                <div className="text-sm font-medium text-slate-900">
+                                <div data-testid="insight-category" className="text-sm font-medium text-slate-900">
                                   {r.categoryLabel}
                                 </div>
-                                <div className="text-xs text-slate-500">
+                                <div data-testid="insight-meta" className="text-xs text-slate-500">
                                   {arrow} {deltaText}
                                 </div>
                               </div>
                             </div>
 
-                            <div className="text-sm font-semibold text-slate-900">
+                            <div data-testid="insight-amount" className="text-sm font-semibold text-slate-900">
                               {formatCRC(r.amount)}
                             </div>
                           </div>
@@ -458,12 +508,14 @@ export default function App() {
                       })}
                     </div>
                   ) : (
-                    <div className="mt-3 text-sm text-slate-600">
+                    <div data-testid="insight-empty" className="mt-3 text-sm text-slate-600">
                       Agrega un gasto para ver tu ranking de categorías.
                     </div>
                   )}
 
-                  <div className="mt-3 text-xs text-slate-500">{topCategoriesInsight.hint}</div>
+                  <div data-testid="insight-footer" className="mt-3 text-xs text-slate-500">
+                    {topCategoriesInsight.hint}
+                  </div>
                 </div>
 
                 <SummaryCards
