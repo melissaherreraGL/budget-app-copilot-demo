@@ -2,7 +2,7 @@
 import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({ // Configuración global
-  testDir: './tests',
+  testDir: './POM/tests',
   timeout: 30_000,
   expect: { timeout: 5_000 },
 
