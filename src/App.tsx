@@ -440,6 +440,14 @@ export default function App() {
             element={
               <div className="space-y-10">
                 <PageTitle title="Dashboard" subtitle="Resumen del mes y categorías" />
+                
+                <SummaryCards
+                  income={totals.income}
+                  expense={totals.expense}
+                  balance={totals.balance}
+                  prevIncome={prevTotals.income}
+                  prevExpense={prevTotals.expense}
+                />
 
                 <GoalsMiniCard month={month} balance={totals.balance} goals={goals} />
 
@@ -518,13 +526,6 @@ export default function App() {
                   </div>
                 </div>
 
-                <SummaryCards
-                  income={totals.income}
-                  expense={totals.expense}
-                  balance={totals.balance}
-                  prevIncome={prevTotals.income}
-                  prevExpense={prevTotals.expense}
-                />
 
                 <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-4">
                   <CategoryChart transactions={monthTransactions} />

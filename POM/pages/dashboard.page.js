@@ -1,16 +1,16 @@
 // /POM/pages/dashboard.page.js
-import { expect } from '@playwright/test';
+import { expect } from '@playwright/test'; // se importa expect para hacer asserts dentro del page
 
 export class DashboardPage {
-  constructor(page) {
-    this.page = page;
+  constructor(page) { // se recibe page dentro del test
+    this.page = page; // se guarda para reutizarlo
 
-    // ===== Header =====
+    // header : aqui se confirma que estoy en el dashboard
     this.title = page.getByRole('heading', { name: 'Dashboard' });
     this.subtitle = page.getByText('Resumen del mes y categorías');
 
 
-    // ===== Goal Progress Bar =====
+    // goal progress bar 
     this.goalCard = page.getByTestId('goal-progress-card');
     this.goalTitle = page.getByTestId('goal-progress-title');
     this.goalSubtitle = page.getByTestId('goal-progress-subtitle');
@@ -20,7 +20,7 @@ export class DashboardPage {
     this.goalBarFill = page.getByTestId('goal-progress-bar-fill');
     this.goalPercent = page.getByTestId('goal-progress-percent');
 
-    // ===== Insight Card =====
+    // insight card : es una lista
     this.insightCard = page.getByTestId('insight-card');
     this.insightTitle = page.getByTestId('insight-title');
     this.insightSubtitle = page.getByTestId('insight-subtitle');
@@ -28,7 +28,7 @@ export class DashboardPage {
     this.insightItems = page.getByTestId('insight-item'); // multiple
     this.insightFooter = page.getByTestId('insight-footer');
 
-    // ===== Summary cards =====
+    // summary card 
     this.summaryGrid = page.getByTestId('summary-cards');
     this.incomeCard = page.getByTestId('summary-income-card');
     this.incomeValue = page.getByTestId('summary-income-value');
@@ -38,7 +38,7 @@ export class DashboardPage {
     this.balanceValue = page.getByTestId('summary-balance-value');
     this.balanceStatus = page.getByTestId('summary-balance-status');
 
-    // ===== Category Chart =====
+    // category chart
     this.categoryChart = page.getByTestId('category-chart');
     this.categoryChartTitle = page.getByTestId('category-chart-title');
     this.categoryChartList = page.getByTestId('category-chart-list');
@@ -46,7 +46,7 @@ export class DashboardPage {
     this.categoryChartFooter = page.getByTestId('category-chart-footer');
   }
 
-  // ===== “Page ready”  =====
+  // page ready: aquí lo que hace es es preguntarle al Dashboard si ya está listo para ser testeado
   async waitForLoaded() {
     await expect(this.title).toBeVisible();
     await expect(this.subtitle).toBeVisible();
@@ -56,12 +56,12 @@ export class DashboardPage {
 
   }
 
-  // ===== Opcional: úsalo solo en tests que sí requieran el chart =====
+  // se va a usar solo cuando los requieran usar el chart
   async waitForCategoryChart(timeout = 15000) {
     await expect(this.categoryChart).toBeVisible({ timeout });
   }
 
-  // ===== Acciones =====
+  // acciones
   async clickGoToGoals() {
     await expect(this.goToGoalsBtn).toBeVisible();
     await expect(this.goToGoalsBtn).toBeEnabled();

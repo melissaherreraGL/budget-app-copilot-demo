@@ -1,7 +1,7 @@
 import { test } from "@playwright/test";
 import { GastosPage } from "../pages/gastos.page";
 
-test("agrega un gasto y aparece en la lista del mes seleccionado", async ({ page }) => {
+test("Agregar un gasto y aparece en la lista del mes seleccionado", async ({ page }) => {
   const gastos = new GastosPage(page);
 
   await gastos.goto();
@@ -24,4 +24,5 @@ test("agrega un gasto y aparece en la lista del mes seleccionado", async ({ page
     category: "food",
     amount: "5000",
   });
+
 });
