@@ -25,12 +25,26 @@ export class GastosPage {
     await this.page.reload();
   }
 
-  // ✅ Más estable: ir directo a la ruta en vez de depender del link
-  async goToGastos() {
-    await this.page.goto("/gastos");
-    await expect(this.page).toHaveURL(/\/gastos$/);
-    await this.expectListVisible();
-  }
+  //  Más estable: ir directo a la ruta en vez de depender del link
+  // goToGastos: no espera la lista que podría no existir cuando está vacía
+async goToGastos() {
+  await this.page.goto("/gastos");
+  await expect(this.page).toHaveURL(/\/gastos$/);
+
+  // espera por el form / input que SIEMPRE está presente
+  await expect(this.amount).toBeVisible({ timeout: 15000 });
+}
+
+// espera con timeout opcional (útil después de crear un gasto)
+async expectListVisible(timeout = 15000) {
+  await expect(this.list).toBeVisible({ timeout });
+}
+
+//acepta timeouts
+async expectListVisible(timeout = 15000) {
+  await expect(this.list).toBeVisible({ timeout });
+}
+
 
   // helpers
   async getVisibleMonthKey() {

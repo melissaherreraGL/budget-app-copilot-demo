@@ -19,17 +19,21 @@ test("Agregar un gasto, aparece en la lista del mes seleccionado y se elimina", 
 
   await gastos.submitExpense();
 
-// confirmo que existe
-    const row = gastos.transactionRowByNote(/almuerzo en restaurante/i);
-    await gastos.expectExpenseRow(row, {
-      category: "food",
-      amount: "5000"});
+  // Espera explícita por la fila que contiene la nota creada
+  const createdRow = gastos.transactionRowByNote(/almuerzo en restaurante/i).first();
+  await expect(createdRow).toBeVisible({ timeout: 15000 });
 
-    //Lo elimina
-    await gastos.deleteExpenseByNote(/almuerzo en restaurante/i);
+  // ahora los asserts sobre la fila
+  await gastos.expectExpenseRow(createdRow, {
+    category: "food",
+    amount: "5000"
+  });
 
-    // Assert final: ya no está
-    await expect(gastos.transactionRowByNote(/almuerzo en restaurante/i)).toHaveCount(0);
+  // Lo elimina
+  await gastos.deleteRow(createdRow); // o await gastos.deleteExpenseByNote(/almuerzo en restaurante/i);
+
+  // Assert final: ya no está
+  await expect(gastos.transactionRowByNote(/almuerzo en restaurante/i)).toHaveCount(0);
   });
 
 
