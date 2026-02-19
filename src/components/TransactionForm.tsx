@@ -1,5 +1,6 @@
 import { useState } from "react";
 import type { Transaction } from "../types/transaction";
+import type { Category } from "../types/transaction";
 
 const CATEGORIES = {
   income: ["salary", "bonus", "other"],
@@ -14,20 +15,19 @@ interface TransactionFormProps {
 export default function TransactionForm({ onAdd, defaultDate }: TransactionFormProps) {
   const [type, setType] = useState<"income" | "expense">("expense");
   const [amount, setAmount] = useState("");
-  const [category, setCategory] = useState<Transaction["category"]>("food");
+  const [category, setCategory] = useState<Category>("food");
   const [date, setDate] = useState(defaultDate);
   const [note, setNote] = useState("");
 
   function handleSubmit(e: { preventDefault: () => void }) {
     e.preventDefault();
     const n = Number(amount);
-
     if (!Number.isFinite(n) || n <= 0) return;
 
     const tx: Transaction = {
       id: crypto?.randomUUID?.() ?? `tx-${Date.now()}`,
       type,
-      amount: Math.round(n), // ✅ Colones: sin decimales
+      amount: Math.round(n),
       category,
       date,
       note,
@@ -58,7 +58,7 @@ export default function TransactionForm({ onAdd, defaultDate }: TransactionFormP
             onChange={(e) => {
               const newType = e.target.value as "income" | "expense";
               setType(newType);
-              setCategory((newType === "income" ? "salary" : "food") as Transaction["category"]);
+              setCategory((newType === "income" ? "salary" : "food") as Category);
             }}
             className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-400"
           >
@@ -99,7 +99,7 @@ export default function TransactionForm({ onAdd, defaultDate }: TransactionFormP
             name="category"
             data-testid="category"
             value={category}
-            onChange={(e) => setCategory(e.target.value as Transaction["category"])}
+            onChange={(e) => setCategory(e.target.value as Category)}
             className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-400"
           >
             {CATEGORIES[type].map((cat) => (
