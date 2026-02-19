@@ -15,8 +15,8 @@
     "test:report": "playwright show-report",
     "test:debug": "PWDEBUG=1 playwright test",
 
-    "test:dev": "BASE_URL=https://budget-app-copilot-demo-hndr23832-melissaherreragls-projects.vercel.app playwright test",
-    "test:qa": "BASE_URL=https://budget-app-copilot-demo-1e04j2503-melissaherreragls-projects.vercel.app playwright test",
+    "test:dev": "BASE_URL=https://budget-app-copilot-demo-git-dev-melissaherreragls-projects.vercel.app playwright test",
+    "test:qa": "BASE_URL=https://budget-app-copilot-demo-git-qa-melissaherreragls-projects.vercel.app playwright test",
     "test:prod": "BASE_URL=https://budget-app-copilot-demo.vercel.app playwright test"
   },
   "dependencies": {
