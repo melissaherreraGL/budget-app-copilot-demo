@@ -5,7 +5,7 @@ import { DashboardPage } from '../pages/dashboard.page.js'; // voy a usar el POM
 
 test('Dashboard - ir a Metas desde Goal card', async ({ page }) => {
   // 1) Ir al sitio con estado limpio
-  await page.goto('http://localhost:5173'); // abro el sitio
+  await this.page.goto("/"); // abro el sitio
   await page.evaluate(() => localStorage.clear()); // borro los datos anteriores
   await page.reload(); // recargo
 

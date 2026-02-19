@@ -1,4 +1,3 @@
-import type React from "react";
 
 interface MonthPickerProps {
   value: string; // "YYYY-MM"

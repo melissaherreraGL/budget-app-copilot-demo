@@ -19,7 +19,7 @@ export default defineConfig({ // Configuración global
     trace: 'on-first-retry',       // traza para depurar fallos
     screenshot: 'only-on-failure', // capturas en fallos
     video: 'retain-on-failure',    // video en fallos
-    baseURL: 'https://example.com' // opcional para usar page.goto('/') 
+    baseURL: process.env.BASE_URL || "http://localhost:5173" // opcional para usar page.goto('/') 
   },
 
   // Ejecuta en desktop Chrome por defecto

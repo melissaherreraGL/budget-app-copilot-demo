@@ -17,7 +17,7 @@ export class GastosPage {
 
   // navegación + setup
   async goto() {
-    await this.page.goto("http://localhost:5173");
+    await this.page.goto("/");
   }
 
   async clearStorageAndReload() {
@@ -55,6 +55,13 @@ export class GastosPage {
     await this.submit.click();
   }
 
+  //Click en delete dentro de una fila
+  async deleteRow(row) {
+    await expect(row).toBeVisible();
+    await row.getByTestId("delete-transaction").click();
+    await expect(row).toHaveCount(0); // valida que se eliminó
+  }
+
   // asserts
   async expectListVisible() {
     await expect(this.list).toBeVisible();
@@ -71,5 +78,10 @@ export class GastosPage {
     await expect(row).toHaveAttribute("data-type", "expense");
     await expect(row).toHaveAttribute("data-category", category);
     await expect(row).toHaveAttribute("data-amount", amount);
+  }
+  // borra por row (reusa lo que ya hiciste)
+  async deleteExpenseByNote(noteRegex) {
+    const row = this.transactionRowByNote(noteRegex).first();
+    await this.deleteRow(row);
   }
 }

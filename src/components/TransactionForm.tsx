@@ -1,11 +1,10 @@
 import { useState } from "react";
 import type { Transaction } from "../types/transaction";
-import type React from "react";
 
 const CATEGORIES = {
   income: ["salary", "bonus", "other"],
   expense: ["food", "transport", "utilities", "shopping", "entertainment", "other"],
-};
+} as const;
 
 interface TransactionFormProps {
   onAdd: (tx: Transaction) => void;
@@ -15,11 +14,11 @@ interface TransactionFormProps {
 export default function TransactionForm({ onAdd, defaultDate }: TransactionFormProps) {
   const [type, setType] = useState<"income" | "expense">("expense");
   const [amount, setAmount] = useState("");
-  const [category, setCategory] = useState("food");
+  const [category, setCategory] = useState<Transaction["category"]>("food");
   const [date, setDate] = useState(defaultDate);
   const [note, setNote] = useState("");
 
-  function handleSubmit(e: React.FormEvent) {
+  function handleSubmit(e: { preventDefault: () => void }) {
     e.preventDefault();
     const n = Number(amount);
 
@@ -59,7 +58,7 @@ export default function TransactionForm({ onAdd, defaultDate }: TransactionFormP
             onChange={(e) => {
               const newType = e.target.value as "income" | "expense";
               setType(newType);
-              setCategory(newType === "income" ? "salary" : "food");
+              setCategory((newType === "income" ? "salary" : "food") as Transaction["category"]);
             }}
             className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-400"
           >
@@ -79,7 +78,7 @@ export default function TransactionForm({ onAdd, defaultDate }: TransactionFormP
             name="amount"
             data-testid="amount"
             type="number"
-            step="1" // ✅ enteros
+            step="1"
             min="0"
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
@@ -91,10 +90,7 @@ export default function TransactionForm({ onAdd, defaultDate }: TransactionFormP
 
         {/* Categoría */}
         <div>
-          <label
-            htmlFor="category"
-            className="block text-xs font-medium text-slate-600 mb-2"
-          >
+          <label htmlFor="category" className="block text-xs font-medium text-slate-600 mb-2">
             Categoría
           </label>
 
@@ -103,7 +99,7 @@ export default function TransactionForm({ onAdd, defaultDate }: TransactionFormP
             name="category"
             data-testid="category"
             value={category}
-            onChange={(e) => setCategory(e.target.value)}
+            onChange={(e) => setCategory(e.target.value as Transaction["category"])}
             className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-400"
           >
             {CATEGORIES[type].map((cat) => (
@@ -151,12 +147,12 @@ export default function TransactionForm({ onAdd, defaultDate }: TransactionFormP
       </div>
 
       <button
-    type="submit"
-    data-testid="submit-transaction"
-    aria-label="Agregar gasto"
-    className="w-full md:w-auto rounded-lg bg-slate-900 px-6 py-2 text-sm font-medium text-white hover:bg-slate-800 transition"
-  >
-    Agregar Gasto
+        type="submit"
+        data-testid="submit-transaction"
+        aria-label="Agregar transacción"
+        className="w-full md:w-auto rounded-lg bg-slate-900 px-6 py-2 text-sm font-medium text-white hover:bg-slate-800 transition"
+      >
+        {type === "income" ? "Agregar Ingreso" : "Agregar Gasto"}
       </button>
     </form>
   );

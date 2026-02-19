@@ -1,3 +1,23 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:root {
+  /* Dark UI tokens */
+  --bg: #0b0f14;
+  --surface: #0f172a;
+  --surface-2: #111827;
+  --border: rgba(255, 255, 255, 0.08);
+  --text: rgba(255, 255, 255, 0.92);
+  --muted: rgba(255, 255, 255, 0.65);
+
+  --success: #22c55e;
+  --danger: #ef4444;
+  --accent: #60a5fa;
+}
+
+html, body {
+  background: var(--bg);
+  color: var(--text);
+}
+
