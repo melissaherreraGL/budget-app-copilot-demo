@@ -4,6 +4,9 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "test:dev": "BASE_URL=https://budget-app-copilot-demo-hndr23832-melissaherreragls-projects.vercel.app npx playwright test",
+    "test:qa": "BASE_URL=https://budget-app-copilot-demo-1e04j2503-melissaherreragls-projects.vercel.app npx playwright test",
+    "test:prod": "BASE_URL=https://budget-app-copilot-demo.vercel.app npx playwright test",
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",

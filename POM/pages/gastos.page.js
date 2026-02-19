@@ -17,7 +17,7 @@ export class GastosPage {
 
   // navegación + setup
   async goto() {
-    await this.page.goto("/");
+    await this.page.goto("/"); // usa baseURL
   }
 
   async clearStorageAndReload() {
@@ -25,9 +25,11 @@ export class GastosPage {
     await this.page.reload();
   }
 
+  // ✅ Más estable: ir directo a la ruta en vez de depender del link
   async goToGastos() {
-    await this.gastosLink.click();
-    await expect(this.page).toHaveURL(/.*\/gastos$/);
+    await this.page.goto("/gastos");
+    await expect(this.page).toHaveURL(/\/gastos$/);
+    await this.expectListVisible();
   }
 
   // helpers
@@ -59,7 +61,9 @@ export class GastosPage {
   async deleteRow(row) {
     await expect(row).toBeVisible();
     await row.getByTestId("delete-transaction").click();
-    await expect(row).toHaveCount(0); // valida que se eliminó
+
+    // ✅ Mejor práctica: validar que ya no existe ese row (fresh locator)
+    await expect(row).toHaveCount(0);
   }
 
   // asserts
@@ -68,9 +72,7 @@ export class GastosPage {
   }
 
   transactionRowByNote(noteRegex) {
-    return this.list
-      .getByTestId("transaction-row")
-      .filter({ hasText: noteRegex });
+    return this.list.getByTestId("transaction-row").filter({ hasText: noteRegex });
   }
 
   async expectExpenseRow(row, { category, amount }) {
@@ -79,6 +81,7 @@ export class GastosPage {
     await expect(row).toHaveAttribute("data-category", category);
     await expect(row).toHaveAttribute("data-amount", amount);
   }
+
   // borra por row (reusa lo que ya hiciste)
   async deleteExpenseByNote(noteRegex) {
     const row = this.transactionRowByNote(noteRegex).first();

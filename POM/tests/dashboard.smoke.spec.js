@@ -1,13 +1,12 @@
 // /POM/tests/dashboard.smoke.spec.js
-import { test, expect } from '@playwright/test'; // voy a escribir un test
-import { DashboardPage } from '../pages/dashboard.page.js'; // voy a usar el POM del dashboard
+import { test, expect } from "@playwright/test";
+import { DashboardPage } from "../pages/dashboard.page.js";
 
-
-test('Dashboard - ir a Metas desde Goal card', async ({ page }) => {
+test("Dashboard - ir a Metas desde Goal card", async ({ page }) => {
   // 1) Ir al sitio con estado limpio
-  await this.page.goto("/"); // abro el sitio
-  await page.evaluate(() => localStorage.clear()); // borro los datos anteriores
-  await page.reload(); // recargo
+  await page.goto("/dashboard");
+  await page.evaluate(() => localStorage.clear());
+  await page.reload();
 
   // 2) Crear el POM después del reload
   const dashboard = new DashboardPage(page);
@@ -16,9 +15,8 @@ test('Dashboard - ir a Metas desde Goal card', async ({ page }) => {
   await dashboard.waitForLoaded();
 
   // 4) Click en "Ver Metas"
-  await dashboard.clickGoToGoals(); 
+  await dashboard.clickGoToGoals();
 
-  // 5) Assert navegación 
-  await expect(page).toHaveURL('http://localhost:5173/metas'); 
-  
+  // 5) Assert navegación (sin hardcodear localhost)
+  await expect(page).toHaveURL(/\/metas$/);
 });
