@@ -4,22 +4,21 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-  "dev": "vite",
-  "build": "tsc -b && vite build",
-  "lint": "eslint .",
-  "preview": "vite preview",
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "lint": "eslint .",
+    "preview": "vite preview",
 
-  "test:e2e": "playwright test",
-  "test:ui": "playwright test --ui",
-  "test:headed": "playwright test --headed",
-  "test:report": "playwright show-report",
-  "test:debug": "PWDEBUG=1 playwright test",
+    "test:e2e": "playwright test",
+    "test:ui": "playwright test --ui",
+    "test:headed": "playwright test --headed",
+    "test:report": "playwright show-report",
+    "test:debug": "PWDEBUG=1 playwright test",
 
-  "test:dev": "BASE_URL=https://budget-app-copilot-demo-hndr23832-melissaherreragls-projects.vercel.app npx playwright test",
-  "test:qa": "BASE_URL=https://budget-app-copilot-demo-1e04j2503-melissaherreragls-projects.vercel.app npx playwright test",
-  "test:prod": "BASE_URL=https://budget-app-copilot-demo.vercel.app npx playwright test"
-},
-
+    "test:dev": "BASE_URL=https://budget-app-copilot-demo-hndr23832-melissaherreragls-projects.vercel.app playwright test",
+    "test:qa": "BASE_URL=https://budget-app-copilot-demo-1e04j2503-melissaherreragls-projects.vercel.app playwright test",
+    "test:prod": "BASE_URL=https://budget-app-copilot-demo.vercel.app playwright test"
+  },
   "dependencies": {
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
@@ -43,18 +42,5 @@
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.46.4",
     "vite": "^7.2.4"
-  },
-  "description": "Aplicación web sencilla para el manejo de presupuesto personal, construida como demo de aprendizaje usando GitHub Copilot.",
-  "main": "eslint.config.js",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/mherrer17/budget-project.git"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/mherrer17/budget-project/issues"
-  },
-  "homepage": "https://github.com/mherrer17/budget-project#readme"
+  }
 }
