@@ -1,65 +1,49 @@
-import { useEffect } from "react";
+import { ReactNode } from "react";
 
-export function Modal({
-  open,
-  title,
-  onClose,
-  children,
-}: {
+interface ModalProps {
   open: boolean;
   title: string;
   onClose: () => void;
-  children: React.ReactNode;
-}) {
-  useEffect(() => {
-    if (!open) return;
+  children: ReactNode;
+}
 
-    function onKeyDown(e: KeyboardEvent) {
-      if (e.key === "Escape") onClose();
-    }
-
-    document.addEventListener("keydown", onKeyDown);
-    return () => document.removeEventListener("keydown", onKeyDown);
-  }, [open, onClose]);
-
+export default function Modal({ open, title, onClose, children }: ModalProps) {
   if (!open) return null;
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      role="dialog"
-      aria-modal="true"
-      aria-label={title}
-    >
+    <>
       {/* Overlay */}
-      <button
-        type="button"
-        className="absolute inset-0 bg-black/40"
-        onClick={onClose}
-        aria-label="Cerrar"
+      <div
+        className="fixed inset-0 bg-black/50 z-40"
+        onMouseDown={onClose}
+        aria-hidden="true"
+        data-testid="modal-overlay"
       />
 
-      {/* Panel */}
-      <div className="relative w-full max-w-xl rounded-2xl bg-white shadow-xl border border-slate-200">
-        <div className="flex items-start justify-between gap-4 p-4 border-b border-slate-200">
-          <div>
-            <h3 className="text-base font-medium">{title}</h3>
-            <p className="text-sm text-slate-500 mt-1">
-              Presiona <span className="font-medium">Esc</span> para cerrar
-            </p>
+      {/* Container */}
+      <div
+        className="fixed inset-0 z-50 flex items-center justify-center p-4"
+        data-testid="modal-container"
+        onMouseDown={(e) => e.stopPropagation()}
+      >
+        <div className="bg-white rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+          {/* Header */}
+          <div className="sticky top-0 border-b border-slate-200 px-6 py-4 flex justify-between items-center bg-white">
+            <h2 className="text-lg font-semibold text-slate-900">{title}</h2>
+            <button
+              onClick={onClose}
+              aria-label="Cerrar modal"
+              className="text-slate-400 hover:text-slate-600 text-2xl leading-none"
+              type="button"
+            >
+              ✕
+            </button>
           </div>
 
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs text-slate-600 hover:bg-slate-100 transition"
-          >
-            Cerrar
-          </button>
+          {/* Content */}
+          <div className="px-6 py-4">{children}</div>
         </div>
-
-        <div className="p-4">{children}</div>
       </div>
-    </div>
+    </>
   );
 }
