@@ -5,7 +5,7 @@ import TransactionForm from "../components/TransactionForm";
 import TransactionList from "../components/TransactionList";
 import Modal from "../components/Modal";
 import { updateTransaction, deleteTransaction } from "../utils/transaction";
-import { toMonthKey } from "../utils/date";
+
 
 interface GastosPageProps {
   currentMonth: string;
@@ -22,10 +22,11 @@ export default function GastosPage({ currentMonth }: GastosPageProps) {
 
   console.log("📊 GastosPage render:", { isModalOpen, editingTransaction: editingTransaction?.id || null });
 
-  const monthKey = toMonthKey(currentMonth);
+  const monthKey = currentMonth.slice(0, 7);
+
   const monthTransactions = allTransactions.filter(
-    (tx) => toMonthKey(tx.date) === monthKey
-  );
+  (tx) => tx.date.slice(0, 7) === monthKey
+);
 
   function handleAddTransaction(tx: Transaction) {
     console.log("➕ Agregar transacción:", tx);
