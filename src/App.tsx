@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { Navigate, Route, Routes, useNavigate } from "react-router-dom";
 
+
 import MonthPicker from "./components/MonthPicker";
 import SummaryCards from "./components/SummaryCards";
 import TransactionForm from "./components/TransactionForm";
@@ -17,6 +18,8 @@ import type { BudgetLimit } from "./types/budget";
 import type { Goal } from "./types/goal";
 import { toMonthKey } from "./utils/date";
 import { formatCRC } from "./utils/money";
+import { useToast } from "./components/useToast";
+
 
 function prevMonthKey(monthKey: string) {
   const [yStr, mStr] = monthKey.split("-");
@@ -210,11 +213,15 @@ export default function App() {
   // ✅ NUEVO: Estado para editar
   const [editOpen, setEditOpen] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
+  
+  const { showToast } = useToast();
+
 
   // ✅ NUEVO: helper para actualizar por id
-  function updateTransactionById(list: Transaction[], updated: Transaction): Transaction[] {
-    return list.map((t) => (t.id === updated.id ? updated : t));
-  }
+function updateTransactionById(list: Transaction[], updated: Transaction): Transaction[] {
+  return list.map((t) => (t.id === updated.id ? updated : t));
+}
+
 
   const monthTransactions = useMemo(() => {
     return transactions
@@ -258,13 +265,31 @@ export default function App() {
   const defaultDate = `${month}-01`;
 
   function addTransaction(tx: Transaction) {
-    setTransactions((prev) => [tx, ...prev]);
-    setAddOpen(false);
-  }
+  setTransactions((prev) => [tx, ...prev]);
+  setAddOpen(false);
+
+  showToast({
+    kind: "success",
+    title: "Transacción agregada",
+    message: `${tx.type === "expense" ? "Gasto" : "Ingreso"} · ₡${tx.amount.toLocaleString("es-CR")}`,
+  });
+}
+
 
   function deleteTransaction(id: string) {
-    setTransactions((prev) => prev.filter((t) => t.id !== id));
-  }
+  const tx = transactions.find((t) => t.id === id);
+
+  setTransactions((prev) => prev.filter((t) => t.id !== id));
+
+  showToast({
+    kind: "success",
+    title: "Transacción eliminada",
+    message: tx
+      ? `${tx.note || tx.category} · ₡${tx.amount.toLocaleString("es-CR")}`
+      : "Eliminada",
+  });
+}
+
 
   // ✅ NUEVO: abrir/cerrar modal de edición
   function openEdit(tx: Transaction) {
@@ -279,9 +304,16 @@ export default function App() {
 
   // ✅ NUEVO: guardar cambios
   function saveEdit(updatedTx: Transaction) {
-    setTransactions((prev) => updateTransactionById(prev, updatedTx));
-    closeEdit();
-  }
+  setTransactions((prev) => updateTransactionById(prev, updatedTx));
+  closeEdit();
+
+  showToast({
+    kind: "success",
+    title: "Transacción actualizada",
+    message: `${updatedTx.type === "expense" ? "Gasto" : "Ingreso"} · ₡${updatedTx.amount.toLocaleString("es-CR")}`,
+  });
+}
+
 
   function seedDemoData() {
     const demo: Transaction[] = [
@@ -473,6 +505,7 @@ export default function App() {
         <Modal open={editOpen} title="✏️ Editar transacción" onClose={closeEdit}>
           {editingTransaction && (
             <TransactionForm
+              key={editingTransaction.id}
               onAdd={saveEdit}
               defaultDate={editingTransaction.date}
               mode="edit"
@@ -583,24 +616,34 @@ export default function App() {
             }
           />
 
-          {/* ✅ GASTOS: LISTA + EDITAR FUNCIONAL */}
-          <Route
-            path="/gastos"
-            element={
-              <div className="space-y-10">
-                <PageTitle title="Gastos" subtitle="Agrega y administra tus transacciones" />
+{/* ✅ GASTOS: FORM + LISTA + EDITAR FUNCIONAL */}
+<Route
+  path="/gastos"
+  element={
+    <div className="space-y-10">
+      <PageTitle title="Gastos" subtitle="Agrega y administra tus transacciones" />
 
-                {/* Ojo: crear se hace con el botón flotante + modal "Agregar" */}
-                <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-4">
-                  <TransactionList
-                    transactions={monthTransactions}
-                    onDelete={deleteTransaction}
-                    onEdit={openEdit}
-                  />
-                </div>
-              </div>
-            }
-          />
+      {/* ✅ FORM INLINE (agregar transacción) */}
+      <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-4">
+        <TransactionForm
+          onAdd={addTransaction}
+          defaultDate={defaultDate}
+          mode="create"
+        />
+      </div>
+
+      {/* ✅ LISTA + EDITAR */}
+      <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-4">
+        <TransactionList
+          transactions={monthTransactions}
+          onDelete={deleteTransaction}
+          onEdit={openEdit}
+        />
+      </div>
+    </div>
+  }
+/>
+
 
           <Route
             path="/presupuesto"

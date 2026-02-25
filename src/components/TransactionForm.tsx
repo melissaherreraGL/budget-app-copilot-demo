@@ -48,15 +48,15 @@ export default function TransactionForm({
   const [note, setNote] = useState(initialValue?.note ?? "");
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  useEffect(() => {
-    if (mode === "edit" && initialValue) {
+ useEffect(() => {
+  if (mode === "edit" && initialValue) {
       setType(initialValue.type);
       setAmount(initialValue.amount.toString());
       setCategory(initialValue.category as Category);
       setDate(initialValue.date);
       setNote(initialValue.note ?? "");
     }
-  }, [mode, initialValue]);
+}, [mode, initialValue]);
 
   function validate(): boolean {
     const newErrors: Record<string, string> = {};

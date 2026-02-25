@@ -5,7 +5,7 @@ export class DashboardPage {
   constructor(page) {
     this.page = page;
 
-    // ✅ Evita role aquí: a veces el accessible name no coincide
+    // Evitar el rol veces el accessible name no coincide
     this.title = page.locator("h2", { hasText: "Dashboard" });
     this.subtitle = page.getByText("Resumen del mes y categorías", { exact: true });
 
@@ -50,7 +50,7 @@ export class DashboardPage {
 
 
 
-  // ✅ Señal de "cargó": testids (más estable que texto/role)
+  // Señal de "cargó": testids (más estable que texto/role)
   async waitForLoaded(timeout = 20000) {
     // 1) confirmo que el layout correcto cargó
     await expect(this.mainNav).toBeVisible({ timeout });
