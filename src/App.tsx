@@ -7,7 +7,7 @@ import TransactionForm from "./components/TransactionForm";
 import TransactionList from "./components/TransactionList";
 import CategoryChart from "./components/CategoryChart";
 import { NavTabs } from "./components/NavTabs";
-import { Modal } from "./components/Modal";
+import Modal from "./components/Modal";
 import { BudgetManager } from "./components/BudgetManager";
 import { GoalsManager } from "./components/GoalsManager";
 
@@ -67,8 +67,13 @@ function AlertCard({
   if (items.length === 0) return null;
 
   return (
-    <div data-testid="budget-alerts-card" className="bg-white rounded-2xl shadow-sm border border-slate-200 p-4">
-      <div data-testid="budget-alerts-title" className="text-sm font-medium">Alertas de presupuesto</div>
+    <div
+      data-testid="budget-alerts-card"
+      className="bg-white rounded-2xl shadow-sm border border-slate-200 p-4"
+    >
+      <div data-testid="budget-alerts-title" className="text-sm font-medium">
+        Alertas de presupuesto
+      </div>
       <div data-testid="budget-alerts-subtitle" className="mt-1 text-xs text-slate-500">
         Basado en tus límites por categoría (mes actual)
       </div>
@@ -77,7 +82,12 @@ function AlertCard({
         {items.map((a, idx) => {
           const icon = a.kind === "danger" ? "🚨" : a.kind === "warn" ? "⚠️" : "✅";
           return (
-            <div key={idx} data-testid="budget-alert-item" data-kind={a.kind} className="rounded-xl border border-slate-200 px-3 py-2">
+            <div
+              key={idx}
+              data-testid="budget-alert-item"
+              data-kind={a.kind}
+              className="rounded-xl border border-slate-200 px-3 py-2"
+            >
               <div className="text-sm font-medium text-slate-900">
                 {icon} {a.title}
               </div>
@@ -197,6 +207,15 @@ export default function App() {
 
   const [addOpen, setAddOpen] = useState(false);
 
+  // ✅ NUEVO: Estado para editar
+  const [editOpen, setEditOpen] = useState(false);
+  const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
+
+  // ✅ NUEVO: helper para actualizar por id
+  function updateTransactionById(list: Transaction[], updated: Transaction): Transaction[] {
+    return list.map((t) => (t.id === updated.id ? updated : t));
+  }
+
   const monthTransactions = useMemo(() => {
     return transactions
       .filter((t) => t.date.slice(0, 7) === month)
@@ -245,6 +264,23 @@ export default function App() {
 
   function deleteTransaction(id: string) {
     setTransactions((prev) => prev.filter((t) => t.id !== id));
+  }
+
+  // ✅ NUEVO: abrir/cerrar modal de edición
+  function openEdit(tx: Transaction) {
+    setEditingTransaction(tx);
+    setEditOpen(true);
+  }
+
+  function closeEdit() {
+    setEditOpen(false);
+    setEditingTransaction(null);
+  }
+
+  // ✅ NUEVO: guardar cambios
+  function saveEdit(updatedTx: Transaction) {
+    setTransactions((prev) => updateTransactionById(prev, updatedTx));
+    closeEdit();
   }
 
   function seedDemoData() {
@@ -428,8 +464,22 @@ export default function App() {
           </button>
         </div>
 
+        {/* Modal Agregar */}
         <Modal open={addOpen} title="Agregar transacción" onClose={() => setAddOpen(false)}>
-          <TransactionForm onAdd={addTransaction} defaultDate={defaultDate} />
+          <TransactionForm onAdd={addTransaction} defaultDate={defaultDate} mode="create" />
+        </Modal>
+
+        {/* ✅ Modal Editar */}
+        <Modal open={editOpen} title="✏️ Editar transacción" onClose={closeEdit}>
+          {editingTransaction && (
+            <TransactionForm
+              onAdd={saveEdit}
+              defaultDate={editingTransaction.date}
+              mode="edit"
+              initialValue={editingTransaction}
+              onClose={closeEdit}
+            />
+          )}
         </Modal>
 
         <Routes>
@@ -440,7 +490,7 @@ export default function App() {
             element={
               <div className="space-y-10">
                 <PageTitle title="Dashboard" subtitle="Resumen del mes y categorías" />
-                
+
                 <SummaryCards
                   income={totals.income}
                   expense={totals.expense}
@@ -453,7 +503,7 @@ export default function App() {
 
                 <AlertCard items={budgetAlerts} />
 
-                {/* ✅ Insight card con testids + data estable */}
+                {/* Insight card */}
                 <div
                   data-testid="insight-card"
                   data-compare-month={topCategoriesInsight.compareMonth}
@@ -526,7 +576,6 @@ export default function App() {
                   </div>
                 </div>
 
-
                 <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-4">
                   <CategoryChart transactions={monthTransactions} />
                 </div>
@@ -534,13 +583,21 @@ export default function App() {
             }
           />
 
+          {/* ✅ GASTOS: LISTA + EDITAR FUNCIONAL */}
           <Route
             path="/gastos"
             element={
               <div className="space-y-10">
                 <PageTitle title="Gastos" subtitle="Agrega y administra tus transacciones" />
-                <TransactionForm onAdd={addTransaction} defaultDate={defaultDate} />
-                <TransactionList transactions={monthTransactions} onDelete={deleteTransaction} />
+
+                {/* Ojo: crear se hace con el botón flotante + modal "Agregar" */}
+                <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-4">
+                  <TransactionList
+                    transactions={monthTransactions}
+                    onDelete={deleteTransaction}
+                    onEdit={openEdit}
+                  />
+                </div>
               </div>
             }
           />
