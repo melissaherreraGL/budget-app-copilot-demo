@@ -1,5 +1,3 @@
-# � Budget App – Gestor de Presupuesto Personal
-
 # 💰 Budget App – Gestor de Presupuesto Personal
 
 [![React](https://img.shields.io/badge/React-18.3-61dafb?style=flat&logo=react)](https://react.dev)
@@ -34,10 +32,14 @@ Aplicación web moderna para gestionar tu presupuesto personal. Registra ingreso
 - **Barra de progreso** con porcentaje completado
 
 ### 📝 Gestión de Transacciones
+- **Crear, Editar y Eliminar transacciones** con interfaz intuitiva
 - **Registra ingresos y gastos** con categoría, fecha y descripción
 - **11+ categorías:** Salario, Comida, Transporte, Vivienda, Servicios, Compras, Entretenimiento, Salud, Educación, Ahorro, Otros
-- **Listado con opción de eliminar** cualquier movimiento
+- **Listado con botones de acción:**
+  - ✏️ **Editar** - Abre modal para modificar la transacción
+  - ✕ **Eliminar** - Elimina la transacción inmediatamente
 - **Persistencia automática** en localStorage
+- **Modal de edición** reutiliza el mismo formulario de creación
 
 ### 📱 Diseño Responsive
 - Optimizado para **Desktop, Tablet y Mobile**
@@ -103,8 +105,8 @@ budget-demo/
 │   ├── components/
 │   │   ├── MonthPicker.tsx         # Selector de mes
 │   │   ├── SummaryCards.tsx        # Tarjetas de resumen
-│   │   ├── TransactionForm.tsx     # Formulario de movimientos
-│   │   ├── TransactionList.tsx     # Listado de transacciones
+│   │   ├── TransactionForm.tsx     # Formulario (crear/editar)
+│   │   ├── TransactionList.tsx     # Listado + botones
 │   │   ├── CategoryChart.tsx       # Gráfico de gastos
 │   │   ├── BudgetManager.tsx       # Gestión de presupuestos
 │   │   ├── GoalsManager.tsx        # Gestión de metas
@@ -123,7 +125,8 @@ budget-demo/
 │   │   └── goal.ts
 │   ├── utils/
 │   │   ├── date.ts                 # Utilidades de fechas
-│   │   └── money.ts                # Formato de moneda (CRC)
+│   │   ├── money.ts                # Formato de moneda (CRC)
+│   │   └── transaction.ts          # Utilidades de transacciones
 │   ├── App.tsx
 │   ├── main.tsx
 │   └── index.css
@@ -156,9 +159,27 @@ budget-demo/
 
 ### 💸 Registrar un Movimiento (Gastos)
 1. Ve a la pestaña **"Gastos"**
-2. Selecciona fecha, descripción, monto y categoría
-3. Elige si es **"Gasto"** o **"Ingreso"**
-4. Haz clic en **"Agregar"**
+2. **Formulario Superior:** Llena los datos (fecha, monto, categoría, nota)
+3. Selecciona si es **"Gasto"** o **"Ingreso"**
+4. Haz clic en **"Agregar Gasto"** o **"Agregar Ingreso"**
+5. La transacción aparece en el listado inferior
+
+### ✏️ Editar una Transacción
+1. Ve a la pestaña **"Gastos"**
+2. Busca la transacción en el listado inferior
+3. Haz clic en el botón **✏️ (Editar)**
+4. Se abre un **Modal con el formulario**
+5. Los campos están **prerellenados** con los datos anteriores
+6. Modifica lo que necesites (monto, categoría, fecha, nota)
+7. Haz clic en **"Guardar Cambios"**
+8. El modal se cierra y la transacción se actualiza
+9. Alternativamente, haz clic en **"Cancelar"** para cerrar sin guardar
+
+### 🗑️ Eliminar una Transacción
+1. Ve a la pestaña **"Gastos"**
+2. Busca la transacción en el listado
+3. Haz clic en el botón **✕ (Eliminar)**
+4. La transacción se elimina inmediatamente
 
 ### 💰 Gestionar Presupuestos
 1. Ve a la pestaña **"Presupuesto"**
@@ -213,6 +234,7 @@ npm run test
 ### Casos de Prueba Implementados
 - ✅ Navegación entre secciones (Dashboard → Metas)
 - ✅ Creación de gastos e ingresos
+- ✅ **Edición de transacciones** (actualizar datos)
 - ✅ Eliminación de transacciones
 - ✅ Persistencia de datos en localStorage
 - ✅ Navegación entre meses
@@ -229,7 +251,7 @@ POM/
 │   └── navBar.component.js        # Locators de navegación
 └── tests/
     ├── dashboard.smoke.spec.js    # Test de flujo completo
-    └── gastos.spec.js             # Test de creación de gastos
+    └── gastos.spec.js             # Test de creación/edición/eliminación
 ```
 
 ---
@@ -250,12 +272,30 @@ Este proyecto demuestra:
 ✅ **Gestión de Estado**
 - Persistencia con localStorage
 - useLocalStorage custom hook
+- useState para estado local
 - useMemo para optimización
+
+✅ **Modal Reutilizable**
+- Componente Modal genérico
+- Uso en edición de transacciones
+- Fácil de extender para otros usos
+
+✅ **Formularios Dinámicos**
+- Mismo componente (`TransactionForm`) para crear y editar
+- Prop `mode` controla el comportamiento
+- `initialValue` precarga datos
+- Validaciones con mensajes de error
+
+✅ **Utilidades Funcionales**
+- `updateTransaction()` - Actualiza array sin mutar
+- `deleteTransaction()` - Elimina sin mutar
+- Funciones puras sin side effects
 
 ✅ **UI/UX Moderna**
 - Tailwind CSS responsive
 - Diseño mobile-first
 - Accesibilidad con componentes semánticos
+- Botones intuitivos (✏️ editar, ✕ eliminar)
 
 ✅ **Testing**
 - Tests E2E con Playwright
@@ -267,6 +307,7 @@ Este proyecto demuestra:
 - Hooks modernos de React
 - React Router para navegación
 - Manejo de errores
+- Código limpio y legible
 
 ---
 
@@ -283,11 +324,22 @@ npm run dev
 - Verifica que localStorage esté habilitado
 - DevTools (F12) → Application → Local Storage → Busca `budget-app`
 
+### "El modal no se abre"
+- Verifica que `Modal.tsx` exista en `src/components/`
+- Comprueba que `isModalOpen` state está siendo actualizado
+- Abre Console (F12) y busca errores
+
 ### "Gráficos no se muestran"
 ```bash
 npm list recharts
 npm install recharts
 ```
+
+### "Edición no funciona"
+1. Haz clic en ✏️ en una transacción
+2. Abre Console (F12)
+3. Deberías ver logs: `🖱️ Click en editar`, `📝 handleEdit llamado`
+4. Si no ves logs, el clic no está llegando
 
 ### "Tests E2E fallan"
 ```bash
@@ -317,7 +369,7 @@ MIT License - Completamente de código abierto.
 
 **Melissa Herrera Rodríguez**
 
-Demo educativo mostrando mejores prácticas en desarrollo web moderno con React, TypeScript y testing E2E.
+Demo educativo mostrando mejores prácticas en desarrollo web moderno con React, TypeScript, Modal reutilizable y testing E2E.
 
 ---
 
@@ -333,15 +385,23 @@ Demo educativo mostrando mejores prácticas en desarrollo web moderno con React,
 - [x] Testing E2E con Playwright
 - [x] Soporte multimoneda (CRC)
 - [x] Comparativa mes anterior
+- [x] **Crear transacciones** ✨
+- [x] **Editar transacciones con Modal** ✨
+- [x] **Eliminar transacciones** ✨
+- [x] Validaciones en formulario
+- [x] Reutilización de componentes (Modal, Form)
 
 ### 🔜 Por Implementar
-- [ ] Edición de transacciones
-- [ ] Filtros avanzados (categoría, fecha)
+- [ ] Filtros avanzados (categoría, fecha, rango)
 - [ ] Exportar a CSV/PDF
 - [ ] Gráficos de tendencias mensuales
-- [ ] Sincronización en la nube
+- [ ] Sincronización en la nube (Firebase)
 - [ ] Notificaciones push
 - [ ] App móvil con React Native
+- [ ] Soporte multi-usuario
+- [ ] Integración con bancos
+- [ ] Análisis predictivo de gastos
+- [ ] Categorización automática con IA
 
 ---
 

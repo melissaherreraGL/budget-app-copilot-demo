@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 import { GastosPage } from "../pages/gastos.page";
 
-test("Agregar un gasto, aparece en la lista del mes seleccionado y se elimina", async ({ page }) => {
+test("Agregar gasto, editarlo y validar toast de actualizado", async ({ page }) => {
   const gastos = new GastosPage(page);
 
   await gastos.goTo();
@@ -11,7 +11,7 @@ test("Agregar un gasto, aparece en la lista del mes seleccionado y se elimina", 
   const monthKey = await gastos.getVisibleMonthKey();
   const fixedDate = `${monthKey}-15`;
 
-  // Agregar
+  // 1) Agregar
   await gastos.fillExpense({
     amount: "5000",
     note: "Almuerzo en restaurante",
@@ -19,26 +19,24 @@ test("Agregar un gasto, aparece en la lista del mes seleccionado y se elimina", 
   });
   await gastos.submitExpense();
 
-  // Toast de agregado
   await gastos.expectToastTitle(/transacción agregada/i);
 
-  // Verificar fila creada
   const createdRow = gastos.transactionRowByNote(/almuerzo en restaurante/i).first();
   await expect(createdRow).toBeVisible({ timeout: 15000 });
 
-  await gastos.expectExpenseRow(createdRow, {
-    category: "food",
-    amount: "5000",
+  // 2) Editar
+  await gastos.openEditForRow(createdRow);
+
+  await gastos.editExpense({
+    amount: "7500",
+    note: "Almuerzo editado",
   });
 
-  // Eliminar
-  await gastos.deleteRow(createdRow);
+  // Toast de actualizado
+  await gastos.expectToastTitle(/transacción actualizada/i);
 
-  // Toast de eliminado
-  await gastos.expectToastTitle(/transacción eliminada/i);
-
-  // Assert final
-  await expect(gastos.transactionRowByNote(/almuerzo en restaurante/i)).toHaveCount(0);
+  // 3) Validar cambio en la lista
+  const editedRow = gastos.transactionRowByNote(/almuerzo editado/i).first();
+  await expect(editedRow).toBeVisible({ timeout: 15000 });
+  await expect(editedRow).toHaveAttribute("data-amount", "7500");
 });
-
-
