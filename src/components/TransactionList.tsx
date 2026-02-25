@@ -23,11 +23,13 @@ function prettyCategory(key: string) {
 interface TransactionListProps {
   transactions: Transaction[];
   onDelete: (id: string) => void;
+  onEdit?: (transaction: Transaction) => void; // ✅ opcional (evita crash)
 }
 
 export default function TransactionList({
   transactions,
   onDelete,
+  onEdit,
 }: TransactionListProps) {
   if (transactions.length === 0) {
     return (
@@ -61,9 +63,9 @@ export default function TransactionList({
             <p className="text-xs text-slate-400 mt-1">{tx.date}</p>
           </div>
 
-          <div className="flex items-center gap-4 ml-4">
+          <div className="flex items-center gap-3 ml-4">
             <span
-              className={`text-sm font-semibold ${
+              className={`text-sm font-semibold whitespace-nowrap ${
                 tx.type === "income" ? "text-green-600" : "text-red-600"
               }`}
             >
@@ -71,12 +73,31 @@ export default function TransactionList({
               {formatCRC(tx.amount)}
             </span>
 
+            {/* EDITAR */}
+            <button
+              type="button"
+              data-testid="edit-transaction"
+              aria-label={`Editar transacción: ${tx.note || tx.category}`}
+              onClick={() => onEdit?.(tx)}
+              className={`text-xs transition ${
+                onEdit
+                  ? "text-slate-400 hover:text-blue-600"
+                  : "text-slate-300 cursor-not-allowed"
+              }`}
+              title={onEdit ? "Editar" : "Editar no disponible"}
+              disabled={!onEdit}
+            >
+              ✏️
+            </button>
+
+            {/* ELIMINAR */}
             <button
               type="button"
               data-testid="delete-transaction"
               aria-label={`Eliminar transacción: ${tx.note || tx.category}`}
               onClick={() => onDelete(tx.id)}
-              className="text-xs text-slate-400 hover:text-slate-600 transition"
+              className="text-xs text-slate-400 hover:text-red-600 transition"
+              title="Eliminar"
             >
               ✕
             </button>
